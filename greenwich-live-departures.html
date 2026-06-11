@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Greenwich Live</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000;
+    --card:#1c1c1e;          /* Apple systemGray6 dark */
+    --card-2:#2c2c2e;
+    --text:#ffffff;
+    --text-2:rgba(235,235,245,.6);
+    --text-3:rgba(235,235,245,.3);
+    --sep:rgba(84,84,88,.5);
+    --green:#30d158;
+    --amber:#ff9f0a;
+    --red:#ff453a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    background:var(--bg);
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',sans-serif;
+    color:var(--text);
+    padding:max(22px,env(safe-area-inset-top)) 16px 40px;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  header{width:100%;max-width:960px;padding:6px 4px 4px;display:flex;justify-content:space-between;align-items:baseline}
+  header h1{font-size:28px;font-weight:700;letter-spacing:-.02em}
+  header .clock{font-size:15px;font-weight:500;color:var(--text-2);font-variant-numeric:tabular-nums}
+
+  .grid{width:100%;max-width:960px;display:grid;grid-template-columns:1fr;gap:12px}
+  @media (min-width:860px){.grid{grid-template-columns:1fr 1fr;gap:14px}}
+
+  .section{
+    grid-column:1 / -1;
+    font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-3);padding:8px 4px 0;
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:28px;
+    padding:18px 20px 16px;
+    box-shadow:0 1px 0 rgba(255,255,255,.04) inset;
+  }
+  .card-head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+  .icon{width:22px;height:22px;flex:0 0 auto;color:var(--text-2)}
+  .route{font-size:16px;font-weight:600;letter-spacing:-.01em;flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .route .arrow{color:var(--text-3);font-weight:400;padding:0 2px}
+  .mode{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--text-2);background:var(--card-2);padding:5px 12px;border-radius:99px;flex:0 0 auto}
+
+  .rows{display:flex;flex-direction:column}
+  .row{display:flex;align-items:center;gap:12px;padding:10px 0}
+  .row + .row{border-top:.5px solid var(--sep)}
+  .row .dest{flex:1 1 auto;font-size:17px;font-weight:500;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .badge{
+    flex:0 0 auto;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;
+    padding:5px 13px;border-radius:99px;
+  }
+  /* traffic light: red = due, amber = under 5 min, green = 5 min or more */
+  .badge.ok  {color:var(--green);background:rgba(48,209,88,.14)}
+  .badge.soon{color:var(--amber);background:rgba(255,159,10,.16)}
+  .badge.due {color:#fff;background:var(--red);animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{50%{opacity:.55}}
+  @media (prefers-reduced-motion:reduce){.badge.due{animation:none}}
+
+  /* catch column: can I walk there in time? */
+  .catch{
+    flex:0 0 auto;min-width:64px;text-align:center;
+    font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
+    padding:5px 10px;border-radius:99px;
+  }
+  .catch.make {color:var(--green);background:rgba(48,209,88,.14)}
+  .catch.tight{color:var(--amber);background:rgba(255,159,10,.16)}
+  .catch.miss {color:var(--red);background:rgba(255,69,58,.14)}
+
+  .empty{padding:18px 0 8px;font-size:15px;color:var(--text-3);text-align:center}
+  .updated{margin-top:12px;font-size:12px;color:var(--text-3)}
+
+  .footer{max-width:960px;font-size:11px;color:var(--text-3);text-align:center;line-height:1.7;padding:0 8px}
+  .errnote{display:none;max-width:960px;font-size:13px;color:var(--text-2);line-height:1.5;text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Greenwich Live</h1>
+  <div class="clock" id="clock">--:--</div>
+</header>
+
+<!-- SF-style line icons -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="ic-train" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="3" width="14" height="15" rx="3.5"/>
+      <path d="M5 11.5h14"/>
+      <circle cx="9" cy="15" r="1" fill="currentColor" stroke="none"/>
+      <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+      <path d="M8.5 18l-2 3M15.5 18l2 3"/>
+    </symbol>
+    <symbol id="ic-boat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 14h16l-1.7 3.6a2 2 0 0 1-1.8 1.1H7.5a2 2 0 0 1-1.8-1.1L4 14z"/>
+      <path d="M6.5 14V9.5a1.5 1.5 0 0 1 1.5-1.5h8a1.5 1.5 0 0 1 1.5 1.5V14"/>
+      <path d="M12 8V5.5h3"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="grid">
+
+  <p class="section">Departing Greenwich</p>
+
+  <div class="card" id="b-dlr-out">
+    <div class="card-head">
+      <svg class="icon"><use href="#ic-train"/></svg>
+      <span class="route">Greenwich <span class="arrow">→</span> Canary Wharf</span>
+      <span class="mode">DLR</span>
+    </div>
+    <div class="rows"><div class="empty">Connecting…</div></div>
+    <p class="updated">—</p>
+  </div>
+
+  <div class="card" id="b-boat-out">
+    <div class="card-head">
+      <svg class="icon"><use href="#ic-boat"/></svg>
+      <span class="route">Greenwich Pier <span class="arrow">→</span> Battersea</span>
+      <span class="mode">BOAT</span>
+    </div>
+    <div class="rows"><div class="empty">Connecting…</div></div>
+    <p class="updated">—</p>
+  </div>
+
+  <p class="section">Returning to Greenwich</p>
+
+  <div class="card" id="b-boat-ret">
+    <div class="card-head">
+      <svg class="icon"><use href="#ic-boat"/></svg>
+      <span class="route">Battersea <span class="arrow">→</span> Greenwich Pier</span>
+      <span class="mode">BOAT</span>
+    </div>
+    <div class="rows"><div class="empty">Connecting…</div></div>
+    <p class="updated">—</p>
+  </div>
+
+  <div class="card" id="b-dlr-ret">
+    <div class="card-head">
+      <svg class="icon"><use href="#ic-train"/></svg>
+      <span class="route">Canary Wharf <span class="arrow">→</span> Greenwich</span>
+      <span class="mode">DLR</span>
+    </div>
+    <div class="rows"><div class="empty">Connecting…</div></div>
+    <p class="updated">—</p>
+  </div>
+
+</div>
+
+<p class="errnote" id="errnote">
+  Could not reach the live feed from this window. If you are viewing this inside a chat preview,
+  download the file and open it in your browser — it connects directly to the TfL API and runs continuously.
+</p>
+
+<p class="footer">
+  Live data: TfL Unified API · refreshed every 30 s · countdowns tick every second · London time
+</p>
+
+<script>
+const API = "https://api.tfl.gov.uk/StopPoint";
+const APP_KEY = "";
+const POLL_MS = 30000;
+
+const EASTBOUND = /barking|woolwich|royal wharf|north greenwich|greenwich/i;
+const isRiverBus = a => a.modeName === "river-bus" || /^rb/i.test(a.lineId||"");
+const destOf = a => (a.destinationName||"") + " " + (a.towards||"");
+
+// walk = estimated minutes on foot from the fixed origin to the boarding point
+const BOARDS = [
+  { el:"b-dlr-out",  kind:"dlr",  stop:"940GZZDLGRE", walk:12, origin:"Point Hill",
+    filter:a => !/lewisham/i.test(destOf(a)) },
+  { el:"b-boat-out", kind:"pier", stop:"930GGNW",     walk:18, origin:"Point Hill",
+    filter:a => isRiverBus(a) && !EASTBOUND.test(destOf(a)) },
+  { el:"b-boat-ret", kind:"pier", stop:"930GBSP",     walk:6,  origin:"Battersea Power Stn",
+    filter:a => isRiverBus(a) && EASTBOUND.test(destOf(a)) },
+  { el:"b-dlr-ret",  kind:"dlr",  stop:"940GZZDLHEQ", walk:5,  origin:"Citigroup",
+    filter:a => /lewisham|greenwich/i.test(destOf(a)) },
+];
+BOARDS.forEach(b => { b.data = []; b.lastOk = null; });
+
+function keyParam(){ return APP_KEY ? `?app_key=${APP_KEY}` : ""; }
+
+async function pollBoards(){
+  await Promise.all(BOARDS.map(async b => {
+    try{
+      const res = await fetch(`${API}/${b.stop}/Arrivals${keyParam()}`, {cache:"no-store"});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      b.data = (await res.json()).filter(b.filter);
+      b.lastOk = Date.now();
+    }catch(e){ console.error(b.el, e); }
+  }));
+  const allStale = BOARDS.every(b => !b.lastOk || Date.now()-b.lastOk > 120000);
+  document.getElementById("errnote").style.display = allStale ? "block" : "none";
+  render();
+}
+
+function cleanDest(name){
+  return (name||"")
+    .replace(/ DLR Station$/i,"").replace(/ \(.*?\)/g,"")
+    .replace(/ Pier$/i,"").replace(/Power Station/i,"Power Stn").trim();
+}
+
+function etaBadge(secs){
+  if(secs <= 60)  return `<span class="badge due">Due</span>`;   // red — board now
+  const m = Math.round(secs/60);
+  const cls = secs < 300 ? "soon" : "ok";                        // amber under 5 min, green at 5+
+  return `<span class="badge ${cls}">${m} min</span>`;
+}
+
+// Can you walk from the origin and still board it?
+// green = arrive with 2+ min spare · amber = on the edge · red = unreachable on foot
+function catchBadge(secs, walkMins){
+  const margin = secs - walkMins*60;
+  if(margin >= 120) return `<span class="catch make">✓ ${Math.floor(margin/60)}m</span>`;
+  if(margin >= 0)   return `<span class="catch tight">Tight</span>`;
+  return `<span class="catch miss">✗</span>`;
+}
+
+function rowsHTML(b){
+  const upcoming = b.data
+    .map(a => ({...a, t:new Date(a.expectedArrival).getTime()}))
+    .filter(a => a.t - Date.now() > -20000)
+    .sort((x,y) => x.t - y.t)
+    .slice(0,5);
+  if(upcoming.length === 0){
+    return `<div class="empty">No ${b.kind==="dlr"?"trains":"departures"} right now</div>`;
+  }
+  return upcoming.map(a => {
+    const secs = Math.round((a.t - Date.now())/1000);
+    return `<div class="row">
+      <span class="dest">${cleanDest(a.destinationName || a.towards || "Check front of train")}</span>
+      ${etaBadge(secs)}
+      ${catchBadge(secs, b.walk)}
+    </div>`;
+  }).join("");
+}
+
+const fmtHM = new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/London"});
+
+function render(){
+  BOARDS.forEach(b => {
+    const root = document.getElementById(b.el);
+    root.querySelector(".rows").innerHTML = rowsHTML(b);
+    root.querySelector(".updated").textContent =
+      (b.lastOk ? `Updated ${fmtHM.format(new Date(b.lastOk))}` : "Waiting for live data…")
+      + ` · Walk ~${b.walk} min from ${b.origin}`;
+  });
+}
+
+function tickClock(){
+  document.getElementById("clock").textContent =
+    new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false,timeZone:"Europe/London"}).format(new Date());
+}
+
+pollBoards();
+setInterval(pollBoards, POLL_MS);
+setInterval(()=>{ render(); tickClock(); }, 1000);
+tickClock();
+</script>
+</body>
+</html>
