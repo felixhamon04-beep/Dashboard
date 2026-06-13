@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ASCENSION — The Engineer's Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#0B0A08;--ink:#100E0A;--panel:#15120C;--panel2:#1C1810;--edge:#2E2616;--edge2:#473a1f;
+  --gold:#C9A24B;--gold-bright:#E8C874;--gold-dim:#7d6630;
+  --ember:#C8633A;--blood:#7A2E2E;--sage:#6B8E6B;--frost:#7C9BB3;--violet:#8B6FA8;
+  --parch:#E8DCC0;--parch-dim:#A99E84;--mut:#6E654E;
+  --serif:'EB Garamond',Georgia,serif;--title:'Cinzel',serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--void);color:var(--parch);font-family:var(--serif);font-size:17px;line-height:1.6;
+  background-image:radial-gradient(ellipse at 50% 0%,rgba(201,162,75,.06),transparent 60%),radial-gradient(ellipse at 50% 100%,rgba(122,46,46,.05),transparent 55%);
+  background-attachment:fixed}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+button:focus-visible{outline:1px solid var(--gold);outline-offset:2px}
+.app{max-width:600px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative}
+.screen{display:none;flex:1;flex-direction:column;padding:18px 18px calc(96px + env(safe-area-inset-bottom))}
+.screen.on{display:flex;animation:fadein .4s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ornamental rule */
+.orn{display:flex;align-items:center;gap:12px;margin:14px 0;color:var(--gold-dim)}
+.orn::before,.orn::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--edge2),transparent)}
+.orn .dot{width:5px;height:5px;transform:rotate(45deg);background:var(--gold);box-shadow:0 0 8px var(--gold)}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top)) 18px 12px;
+  border-bottom:1px solid var(--edge);position:sticky;top:0;z-index:5;
+  background:linear-gradient(180deg,rgba(11,10,8,.97),rgba(11,10,8,.82));backdrop-filter:blur(10px)}
+.crest{font-family:var(--title);font-weight:800;font-size:15px;letter-spacing:.18em;color:var(--gold-bright);text-shadow:0 0 14px rgba(201,162,75,.35)}
+.spacer{flex:1}
+.rune{font-family:var(--mono);font-size:11px;color:var(--parch-dim);border:1px solid var(--edge);border-radius:2px;padding:4px 10px;background:rgba(28,24,16,.6);white-space:nowrap;letter-spacing:.04em}
+.rune b{color:var(--gold-bright);font-weight:700}
+.rune.fire b{color:var(--ember)}
+
+/* bottom nav */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:6;
+  background:linear-gradient(0deg,rgba(11,10,8,.99),rgba(11,10,8,.9));border-top:1px solid var(--edge);backdrop-filter:blur(10px);
+  padding-bottom:env(safe-area-inset-bottom)}
+.nav .inner{max-width:600px;margin:0 auto;display:flex}
+.nav button{flex:1;padding:12px 4px 13px;font-family:var(--title);font-size:9.5px;font-weight:600;letter-spacing:.14em;color:var(--mut);display:flex;flex-direction:column;gap:4px;align-items:center;transition:color .2s}
+.nav button .ico{font-size:18px;line-height:1;filter:grayscale(.4)}
+.nav button.act{color:var(--gold-bright)}
+.nav button.act .ico{filter:none;text-shadow:0 0 10px rgba(201,162,75,.5)}
+
+h1{font-family:var(--title);font-weight:800;font-size:30px;letter-spacing:.04em;color:var(--parch);line-height:1.1;text-shadow:0 2px 20px rgba(0,0,0,.6)}
+h1 .em{color:var(--gold-bright)}
+h2{font-family:var(--title);font-weight:700;font-size:21px;letter-spacing:.03em;color:var(--parch)}
+.sub{font-family:var(--serif);font-size:16px;color:var(--parch-dim);margin-top:8px;font-style:italic}
+.sub b{color:var(--parch);font-style:normal;font-weight:600}
+
+/* sigil progress (rank) */
+.sigil{margin:16px 0 6px;height:3px;background:var(--panel2);border-radius:2px;overflow:hidden;border:1px solid var(--edge)}
+.sigil .fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold-bright));box-shadow:0 0 12px var(--gold);width:0%;transition:width .6s ease}
+.sigil-line{display:flex;justify-content:space-between;font-family:var(--title);font-size:11px;letter-spacing:.1em;color:var(--parch-dim);font-weight:600}
+.sigil-line b{color:var(--gold-bright)}
+
+/* map nodes */
+.map{margin-top:8px;display:flex;flex-direction:column;gap:0}
+.act-label{font-family:var(--title);font-weight:700;font-size:12px;letter-spacing:.22em;color:var(--gold-dim);text-transform:uppercase;margin:22px 0 10px;text-align:center;position:relative}
+.node{display:flex;gap:15px;align-items:center;background:linear-gradient(135deg,rgba(28,24,16,.7),rgba(16,14,10,.7));
+  border:1px solid var(--edge);border-radius:4px;padding:15px;text-align:left;width:100%;position:relative;transition:border-color .25s,transform .08s;margin-bottom:11px}
+.node:active{transform:scale(.99)}
+.node:not(.lock):hover{border-color:var(--gold-dim)}
+.node .seal{width:54px;height:54px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-family:var(--title);font-weight:800;font-size:19px;color:var(--void);position:relative;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.node .info{flex:1;min-width:0}
+.node .nm{font-family:var(--title);font-weight:700;font-size:16px;letter-spacing:.02em;color:var(--parch)}
+.node .ds{font-family:var(--mono);font-size:10.5px;color:var(--parch-dim);margin-top:3px;letter-spacing:.02em}
+.node .pct{font-family:var(--title);font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--sage);margin-top:6px}
+.node.lock{opacity:.4}
+.node.lock .seal{background:var(--panel2)!important;color:var(--mut)}
+.node .crown{position:absolute;top:-7px;right:-7px;width:22px;height:22px;background:var(--gold);color:var(--void);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 0 12px var(--gold)}
+
+/* mission list */
+.mlist{margin-top:8px;display:flex;flex-direction:column;gap:11px}
+.mrow{display:flex;gap:13px;align-items:center;background:linear-gradient(135deg,rgba(28,24,16,.6),rgba(16,14,10,.6));
+  border:1px solid var(--edge);border-radius:4px;padding:15px;text-align:left;width:100%;transition:border-color .2s}
+.mrow:not(.lockm):hover{border-color:var(--gold-dim)}
+.mrow .mi{width:40px;height:40px;border-radius:3px;background:var(--panel2);border:1px solid var(--edge);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.mrow .mt{font-family:var(--title);font-weight:600;font-size:15px;color:var(--parch);letter-spacing:.01em}
+.mrow .ms{font-family:var(--mono);font-size:10.5px;color:var(--parch-dim);margin-top:2px}
+.mrow.donem{border-color:var(--gold-dim)}
+.mrow.donem .mi{background:rgba(201,162,75,.1);border-color:var(--gold-dim)}
+.mrow.lockm{opacity:.4}
+
+.backbtn{font-family:var(--title);font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--parch-dim);padding:8px 0;align-self:flex-start;transition:color .2s}
+.backbtn:hover{color:var(--gold-bright)}
+
+/* scroll (lesson) */
+.scroll{background:linear-gradient(135deg,rgba(28,24,16,.85),rgba(16,14,10,.9));border:1px solid var(--edge2);
+  border-radius:4px;padding:22px;margin-top:14px;font-size:16.5px;line-height:1.72;position:relative;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.3)}
+.scroll::before{content:"❧";position:absolute;top:10px;right:14px;color:var(--gold-dim);font-size:18px}
+.scroll h3{font-family:var(--title);font-size:13px;font-weight:700;letter-spacing:.16em;color:var(--gold-bright);margin-bottom:14px;text-transform:uppercase}
+.scroll p{margin-bottom:12px}
+.scroll p:last-child{margin-bottom:0}
+.scroll b{color:var(--gold-bright);font-weight:600}
+.scroll .recall{margin-top:16px;padding-top:14px;border-top:1px solid var(--edge);font-style:italic;color:var(--frost);font-size:15px}
+.scroll .recall::before{content:"◆ ";color:var(--gold-dim);font-style:normal}
+
+code{font-family:var(--mono);font-size:13px;background:rgba(11,13,20,.8);padding:2px 7px;border-radius:3px;color:var(--gold-bright);border:1px solid var(--edge)}
+pre{font-family:var(--mono);font-size:13px;background:#0B0D14;border:1px solid var(--edge2);border-radius:4px;padding:14px;overflow-x:auto;color:var(--parch);margin:12px 0;line-height:1.75;white-space:pre}
+
+/* primary action button — forged */
+.forge-btn{display:block;width:100%;font-family:var(--title);font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--void);background:linear-gradient(180deg,var(--gold-bright),var(--gold));border-radius:3px;padding:16px;margin-top:18px;
+  box-shadow:0 0 20px rgba(201,162,75,.25),inset 0 1px 0 rgba(255,255,255,.3);transition:transform .08s,box-shadow .2s}
+.forge-btn:active{transform:translateY(1px) scale(.995)}
+.forge-btn.ghost{background:transparent;color:var(--parch-dim);border:1px solid var(--edge2);box-shadow:none}
+.forge-btn.sage{background:linear-gradient(180deg,var(--sage),#52704f);color:#0c120b}
+.forge-btn:disabled{opacity:.4;box-shadow:none}
+
+/* exercise */
+.exhead{display:flex;align-items:center;gap:12px;margin-top:12px}
+.bar{flex:1;background:var(--panel2);border:1px solid var(--edge);border-radius:2px;height:8px;overflow:hidden}
+.bar .fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));width:0%;transition:width .35s}
+.combo{font-family:var(--mono);font-size:11px;color:var(--ember);min-width:56px;text-align:right;letter-spacing:.04em}
+.qtext{font-size:18px;font-weight:500;color:var(--parch);margin-top:20px;line-height:1.5}
+.opts{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.opt{background:linear-gradient(135deg,rgba(28,24,16,.5),rgba(16,14,10,.5));border:1px solid var(--edge);border-radius:3px;padding:14px 15px;text-align:left;font-size:15.5px;color:var(--parch);width:100%;transition:border-color .15s,background .15s}
+.opt:active{border-color:var(--gold)}
+.opt.sel{border-color:var(--gold);background:rgba(201,162,75,.08)}
+.opt.right{border-color:var(--sage);background:rgba(107,142,107,.14)}
+.opt.wrong{border-color:var(--blood);background:rgba(122,46,46,.16)}
+.opt code{pointer-events:none}
+input.ans,textarea.ans{width:100%;background:#0B0D14;border:1px solid var(--edge2);border-radius:3px;color:var(--gold-bright);font-family:var(--mono);font-size:15px;padding:14px;margin-top:16px}
+textarea.ans{min-height:88px;resize:vertical}
+input.ans:focus,textarea.ans:focus{outline:none;border-color:var(--gold)}
+.plines{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.pline{background:linear-gradient(135deg,rgba(28,24,16,.5),rgba(16,14,10,.5));border:1px solid var(--edge);border-radius:3px;padding:12px 14px;text-align:left;font-family:var(--mono);font-size:13px;color:var(--parch);white-space:pre-wrap;width:100%}
+.pline.used{opacity:.25;pointer-events:none}
+.pbuild{margin-top:14px;background:#0B0D14;border:1px dashed var(--edge2);border-radius:4px;padding:11px;min-height:54px}
+.pbuild .pline{margin-bottom:7px;border-color:var(--gold-dim)}
+.pbuild .lbl{font-family:var(--title);font-size:10px;font-weight:600;color:var(--gold-dim);letter-spacing:.12em;margin-bottom:8px;text-transform:uppercase}
+.feedback{margin-top:16px;border-radius:4px;padding:16px;font-size:15.5px;display:none;line-height:1.6}
+.feedback.ok{display:block;background:rgba(107,142,107,.12);border:1px solid var(--sage)}
+.feedback.no{display:block;background:rgba(122,46,46,.14);border:1px solid var(--blood)}
+.feedback .fhead{font-family:var(--title);font-weight:700;font-size:12px;letter-spacing:.12em;margin-bottom:8px;text-transform:uppercase}
+.feedback.ok .fhead{color:var(--gold-bright)}
+.feedback.no .fhead{color:var(--ember)}
+.hintbox{margin-top:14px;font-size:14.5px;color:var(--parch-dim);background:rgba(28,24,16,.5);border:1px dashed var(--edge2);border-radius:4px;padding:13px;display:none;font-style:italic}
+.hintbox.on{display:block}
+.hintbtn{font-family:var(--title);font-size:11px;letter-spacing:.1em;color:var(--parch-dim);margin-top:14px;text-decoration:underline;text-underline-offset:3px}
+
+/* stats */
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.stat{background:linear-gradient(135deg,rgba(28,24,16,.6),rgba(16,14,10,.6));border:1px solid var(--edge);border-radius:4px;padding:18px;text-align:center}
+.stat .n{font-family:var(--title);font-weight:800;font-size:28px;color:var(--gold-bright);text-shadow:0 0 14px rgba(201,162,75,.3)}
+.stat .l{font-family:var(--mono);font-size:9.5px;color:var(--parch-dim);letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
+.rankcard{margin-top:16px;background:radial-gradient(ellipse at 50% 0%,rgba(201,162,75,.12),transparent),linear-gradient(135deg,rgba(28,24,16,.8),rgba(16,14,10,.9));border:1px solid var(--edge2);border-radius:6px;padding:24px;text-align:center}
+.rankcard .r{font-family:var(--title);font-weight:900;font-size:25px;letter-spacing:.06em;color:var(--gold-bright);text-shadow:0 0 20px rgba(201,162,75,.4)}
+.rankcard .rn{font-family:var(--mono);font-size:11px;color:var(--parch-dim);margin-top:6px;letter-spacing:.03em}
+
+/* badges */
+.badges{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.badge{background:linear-gradient(135deg,rgba(28,24,16,.6),rgba(16,14,10,.6));border:1px solid var(--edge);border-radius:4px;padding:15px;display:flex;gap:11px;align-items:center}
+.badge .bi{font-size:25px;flex:none;filter:drop-shadow(0 0 6px rgba(201,162,75,.3))}
+.badge .bn{font-family:var(--title);font-weight:600;font-size:13.5px;color:var(--parch)}
+.badge .bd{font-family:var(--mono);font-size:10px;color:var(--parch-dim);margin-top:2px}
+.badge.locked{opacity:.28;filter:grayscale(1)}
+
+/* settings */
+.sbox{margin-top:16px;background:linear-gradient(135deg,rgba(28,24,16,.6),rgba(16,14,10,.6));border:1px solid var(--edge);border-radius:4px;padding:18px}
+.sbox h3{font-family:var(--title);font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--gold-bright);margin-bottom:10px;text-transform:uppercase}
+.sbox p{font-size:14.5px;color:var(--parch-dim);margin-bottom:12px}
+.minibtn{font-family:var(--title);font-size:11px;letter-spacing:.08em;border:1px solid var(--edge2);border-radius:3px;padding:10px 15px;color:var(--parch);margin:0 8px 6px 0;background:rgba(28,24,16,.5)}
+.minibtn:active{border-color:var(--gold)}
+.dangerbtn{border-color:var(--blood);color:var(--ember)}
+.savebanner{margin-top:14px;padding:12px 14px;border-radius:4px;font-family:var(--mono);font-size:12px;line-height:1.5}
+.savebanner.good{background:rgba(107,142,107,.12);border:1px solid var(--sage);color:var(--parch)}
+.savebanner.warn{background:rgba(200,99,58,.12);border:1px solid var(--ember);color:var(--parch)}
+
+/* LAB */
+.labsel{width:100%;background:rgba(28,24,16,.7);border:1px solid var(--edge2);border-radius:3px;color:var(--parch);font-family:var(--title);font-size:13px;font-weight:600;letter-spacing:.04em;padding:14px;margin-top:14px;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--gold) 50%),linear-gradient(135deg,var(--gold) 50%,transparent 50%);background-position:calc(100% - 18px) center,calc(100% - 13px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.labtask{background:linear-gradient(135deg,rgba(28,24,16,.8),rgba(16,14,10,.9));border:1px solid var(--violet);border-radius:4px;padding:17px;margin-top:14px;font-size:15.5px;line-height:1.6}
+.labtask h3{font-family:var(--title);font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--violet);margin-bottom:8px}
+.labtask b{color:var(--gold-bright)}
+.labtask .flag{color:var(--sage);font-family:var(--mono);font-size:11px;margin-top:8px;display:block}
+.forge-canvas{width:100%;height:150px;margin-top:14px;border:1px solid var(--edge2);border-radius:4px;background:#080a10;display:block}
+.labed{width:100%;background:#0B0D14;border:1px solid var(--edge2);border-radius:4px;color:var(--gold-bright);font-family:var(--mono);font-size:13.5px;padding:14px;margin-top:12px;min-height:190px;resize:vertical;line-height:1.65;tab-size:4;white-space:pre}
+.labed:focus{outline:none;border-color:var(--gold)}
+.runout{font-family:var(--mono);font-size:12.5px;background:#0B0D14;border:1px solid var(--edge);border-radius:4px;padding:13px;margin-top:12px;white-space:pre-wrap;color:var(--parch-dim);min-height:46px;line-height:1.55}
+.runout.ok{border-color:var(--sage);color:var(--parch)}
+.runout.err{border-color:var(--blood);color:#e8b0a0}
+.pystatus{font-family:var(--mono);font-size:10.5px;color:var(--mut);margin-top:10px;letter-spacing:.02em}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(8,7,5,.9);display:none;align-items:center;justify-content:center;z-index:20;padding:22px;backdrop-filter:blur(4px)}
+.modal.on{display:flex;animation:fadein .3s}
+.mbox{background:radial-gradient(ellipse at 50% 0%,rgba(201,162,75,.1),transparent),linear-gradient(135deg,rgba(28,24,16,.97),rgba(16,14,10,.98));border:1px solid var(--edge2);border-radius:8px;padding:28px;max-width:440px;width:100%;text-align:center;max-height:86vh;overflow-y:auto;box-shadow:0 0 60px rgba(0,0,0,.7),inset 0 0 40px rgba(201,162,75,.04)}
+.mbox .big{font-size:48px;margin-bottom:12px;filter:drop-shadow(0 0 16px rgba(201,162,75,.4))}
+.mbox h2{margin-bottom:10px}
+.mbox p{color:var(--parch-dim);font-size:15px;margin-bottom:8px;line-height:1.55}
+.mbox p b{color:var(--parch)}
+.mbox .deco{font-family:var(--title);font-size:11px;letter-spacing:.3em;color:var(--gold-dim);margin-bottom:14px;text-transform:uppercase}
+
+.toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%) translateY(-90px);
+  background:linear-gradient(135deg,rgba(28,24,16,.98),rgba(16,14,10,.98));border:1px solid var(--gold);border-radius:4px;
+  padding:12px 20px;font-family:var(--title);font-size:12.5px;letter-spacing:.06em;color:var(--gold-bright);z-index:30;transition:transform .35s;white-space:nowrap;box-shadow:0 0 24px rgba(201,162,75,.3)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.spark{position:fixed;top:-12px;width:7px;height:7px;z-index:25;pointer-events:none;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(108vh) rotate(600deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="crest">⚜ ASCENSION</div>
+    <div class="spacer"></div>
+    <div class="rune fire">🔥 <b id="c-streak">0</b></div>
+    <div class="rune">✦ <b id="c-xp">0</b></div>
+  </div>
+
+  <!-- HOME / MAP -->
+  <div class="screen on" id="s-home">
+    <h1 style="margin-top:16px">The Path of <span class="em">Ascension</span></h1>
+    <p class="sub">Twelve trials stand between you and mastery. Walk them in order. Each forges what the next demands.</p>
+    <div class="sigil"><div class="fill" id="rankfill"></div></div>
+    <div class="sigil-line"><span id="rankname">—</span><b id="ranknext">—</b></div>
+    <button class="forge-btn ghost" id="drillbtn" onclick="startDrill()" style="margin-top:14px">◆ DAILY DRILL — sharpen what you've learned</button>
+    <div class="map" id="map"></div>
+  </div>
+
+  <!-- TRIAL (level) -->
+  <div class="screen" id="s-level">
+    <button class="backbtn" onclick="go('home')">‹ THE PATH</button>
+    <h1 id="lv-title" style="margin-top:6px"></h1>
+    <p class="sub" id="lv-sub"></p>
+    <div class="orn"><span class="dot"></span></div>
+    <div class="mlist" id="mlist"></div>
+  </div>
+
+  <!-- SCROLL (lesson) -->
+  <div class="screen" id="s-lesson">
+    <button class="backbtn" id="lessonback">‹ BACK</button>
+    <h2 id="ls-title" style="margin-top:6px"></h2>
+    <div class="scroll" id="ls-body"></div>
+    <button class="forge-btn" onclick="startEx()">BEGIN THE TRIAL ›</button>
+  </div>
+
+  <!-- EXERCISE -->
+  <div class="screen" id="s-ex">
+    <button class="backbtn" id="exquit">✕ WITHDRAW</button>
+    <div class="exhead">
+      <div class="bar"><div class="fill" id="exbar"></div></div>
+      <div class="combo" id="excombo"></div>
+    </div>
+    <div id="exbody"></div>
+    <div class="hintbox" id="hintbox"></div>
+    <button class="hintbtn" id="hintbtn" onclick="showHint()">seek a hint</button>
+    <div class="feedback" id="fb"><div class="fhead" id="fbhead"></div><div id="fbbody"></div></div>
+    <button class="forge-btn" id="exmain" onclick="exMain()">INSCRIBE</button>
+  </div>
+
+  <!-- LAB -->
+  <div class="screen" id="s-lab">
+    <h1 style="margin-top:16px">The <span class="em">Forge</span> 🔨</h1>
+    <p class="sub">Real Python, running on your iPad. Write the spell, strike RUN, watch the forge answer. This is where knowing becomes doing.</p>
+    <canvas class="forge-canvas" id="forge" width="560" height="150"></canvas>
+    <select class="labsel" id="labsel" onchange="selectLab(this.value)"></select>
+    <div class="labtask" id="labtask"></div>
+    <textarea class="labed" id="labed" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+    <button class="forge-btn sage" id="runbtn" onclick="runLab()">▶ STRIKE THE FORGE</button>
+    <div class="runout" id="runout">The forge is cold. Write code, then strike.</div>
+    <div class="pystatus" id="pystatus"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="screen" id="s-stats">
+    <h1 style="margin-top:16px">Chronicle</h1>
+    <div class="rankcard"><div class="r" id="st-rank">—</div><div class="rn" id="st-ranknext">—</div></div>
+    <div class="statgrid">
+      <div class="stat"><div class="n" id="st-xp">0</div><div class="l">essence (xp)</div></div>
+      <div class="stat"><div class="n" id="st-time">0m</div><div class="l">time in app</div></div>
+      <div class="stat"><div class="n" id="st-streak">0</div><div class="l">day streak 🔥</div></div>
+      <div class="stat"><div class="n" id="st-best">0</div><div class="l">longest streak</div></div>
+      <div class="stat"><div class="n" id="st-done">0</div><div class="l">trials solved</div></div>
+      <div class="stat"><div class="n" id="st-acc">—</div><div class="l">first-strike accuracy</div></div>
+      <div class="stat"><div class="n" id="st-lvls">0/12</div><div class="l">trials cleared</div></div>
+      <div class="stat"><div class="n" id="st-labs">0/12</div><div class="l">forge builds</div></div>
+    </div>
+    <div class="sbox">
+      <h3>⚜ The Soul Vault — Saving</h3>
+      <div id="savebanner"></div>
+      <p style="margin-top:12px">Move your progress between devices with a soul code.</p>
+      <button class="minibtn" onclick="exportSave()">EXPORT SOUL CODE</button>
+      <button class="minibtn" onclick="importSave()">IMPORT</button>
+      <button class="minibtn dangerbtn" onclick="resetSave()">ERASE ALL</button>
+    </div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="screen" id="s-badges">
+    <h1 style="margin-top:16px">Relics</h1>
+    <p class="sub">Won through devotion and craft.</p>
+    <div class="badges" id="badgegrid"></div>
+  </div>
+</div>
+
+<div class="nav"><div class="inner">
+  <button id="n-home" class="act" onclick="go('home')"><span class="ico">⚔️</span>PATH</button>
+  <button id="n-lab" onclick="go('lab')"><span class="ico">🔨</span>FORGE</button>
+  <button id="n-stats" onclick="go('stats')"><span class="ico">📜</span>CHRONICLE</button>
+  <button id="n-badges" onclick="go('badges')"><span class="ico">🏅</span>RELICS</button>
+</div></div>
+
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   ASCENSION — engine
+   ============================================================ */
+
+/* ---- storage: window.storage -> localStorage -> memory ---- */
+var MEM={},SAVE_KEY="ascension-save",saveMode="memory";
+function detectStorage(){
+  try{if(window.storage&&window.storage.get&&window.storage.set){saveMode="cloud";return;}}catch(e){}
+  try{localStorage.setItem("__t","1");localStorage.removeItem("__t");saveMode="local";return;}catch(e){}
+  saveMode="memory";
+}
+async function loadSave(){
+  try{
+    if(saveMode==="cloud"){var r=await window.storage.get(SAVE_KEY);return r&&r.value?JSON.parse(r.value):null;}
+    if(saveMode==="local"){var v=localStorage.getItem(SAVE_KEY);return v?JSON.parse(v):null;}
+    return MEM[SAVE_KEY]?JSON.parse(MEM[SAVE_KEY]):null;
+  }catch(e){return null;}
+}
+function persistNow(){
+  var v=JSON.stringify(S);
+  try{
+    if(saveMode==="cloud"){window.storage.set(SAVE_KEY,v);}
+    else if(saveMode==="local"){localStorage.setItem(SAVE_KEY,v);}
+    else{MEM[SAVE_KEY]=v;}
+  }catch(e){}
+}
+var saveTimer=null;
+function persist(){clearTimeout(saveTimer);saveTimer=setTimeout(persistNow,250);}
+/* iPad Safari freezes timers on hide/switch — flush synchronously */
+window.addEventListener("pagehide",persistNow);
+window.addEventListener("beforeunload",persistNow);
+document.addEventListener("visibilitychange",function(){if(document.hidden)persistNow();});
+
+/* ---- state ---- */
+var S={v:3,xp:0,timeMs:0,streak:0,bestStreak:0,lastDay:"",done:{},ftOk:0,ftTotal:0,
+  missions:{},bosses:{},badges:{},todayKey:"",todayMs:0,bugCount:0,labs:{},solvedIds:[]};
+function migrate(s){ if(!s.labs)s.labs={}; if(!s.solvedIds)s.solvedIds=[]; if(!s.bugCount)s.bugCount=0; s.v=3; return s; }
+
+/* ---- ranks ---- */
+var RANKS=[[0,"WANDERER"],[400,"INITIATE"],[1200,"ADEPT"],[3000,"ARTISAN"],[6000,"WARDEN"],[10000,"ARCHON"],[16000,"ASCENDANT ENGINEER"]];
+function rankOf(xp){var r=RANKS[0];for(var i=0;i<RANKS.length;i++){if(xp>=RANKS[i][0])r=RANKS[i];}return r;}
+function nextRank(xp){for(var i=0;i<RANKS.length;i++){if(xp<RANKS[i][0])return RANKS[i];}return null;}
+
+/* ---- relics (badges) ---- */
+var BADGES=[
+["first","🩸","First Blood","Solve your first trial"],
+["hello","🌑","Awakened","Clear the first mission"],
+["streak7","🔥","Seven Flames","7-day streak"],
+["streak30","🌋","Undying","30-day streak"],
+["streak100","☄️","Eternal","100-day streak"],
+["xp1k","✦","Kindled","1,000 essence"],
+["xp5k","✸","Radiant","5,000 essence"],
+["xp15k","❂","Incandescent","15,000 essence"],
+["boss1","⚔️","Trialslayer","Defeat your first boss"],
+["perfect","💎","Flawless","Perfect score on any boss"],
+["bugs10","🐛","Bane of Bugs","Find 10 bugs in code"],
+["session20","🌀","Relentless","20 trials in one sitting"],
+["lab1","🔨","First Forging","Run real Python in the Forge"],
+["lab6","⚒️","Smith","Pass 6 Forge builds"],
+["lab12","⚗️","Forgemaster","Pass all 12 Forge builds"],
+["drill5","🎯","Disciplined","Complete 5 Daily Drills"],
+["shipped","🚀","Shipwright","Clear Trial IV"],
+["half","🏔️","Summit-Bound","Clear Trial VI"],
+["legend","👑","Ascendant","Clear all 12 trials"]
+];
+function award(id){
+  if(S.badges[id])return;
+  S.badges[id]=1;persistNow();
+  var b=null;for(var i=0;i<BADGES.length;i++){if(BADGES[i][0]===id)b=BADGES[i];}
+  if(!b)return;
+  setTimeout(function(){openModal('<div class="big">'+b[1]+'</div><div class="deco">Relic Won</div><h2>'+b[2]+'</h2><p>'+b[3]+'</p><button class="forge-btn" onclick="closeModal()">CLAIM</button>');sparks();},380);
+}
+var drillCount=0;
+function checkBadges(){
+  if(S.xp>=1000)award("xp1k");if(S.xp>=5000)award("xp5k");if(S.xp>=15000)award("xp15k");
+  if(S.streak>=7)award("streak7");if(S.streak>=30)award("streak30");if(S.streak>=100)award("streak100");
+  if(S.bugCount>=10)award("bugs10");
+  if(sessionSolved>=20)award("session20");
+  var lc=Object.keys(S.labs||{}).length;
+  if(lc>=1)award("lab1");if(lc>=6)award("lab6");if(lc>=12)award("lab12");
+}
+
+/* ---- time & streak ---- */
+var tickTimer=null;
+function dayKey(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function startClock(){
+  if(tickTimer)return;
+  tickTimer=setInterval(function(){
+    if(document.hidden)return;
+    S.timeMs+=5000;
+    if(S.todayKey!==dayKey()){S.todayKey=dayKey();S.todayMs=0;}
+    S.todayMs+=5000;persist();
+  },5000);
+}
+function touchStreak(){
+  var today=dayKey();
+  if(S.lastDay===today)return;
+  var y=new Date();y.setDate(y.getDate()-1);
+  var yk=y.getFullYear()+"-"+(y.getMonth()+1)+"-"+y.getDate();
+  S.streak=(S.lastDay===yk)?S.streak+1:1;
+  if(S.streak>S.bestStreak)S.bestStreak=S.streak;
+  S.lastDay=today;persistNow();
+}
+
+/* ---- helpers ---- */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function codeBlock(c){return '<pre>'+esc(c)+'</pre>';}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1900);}
+function openModal(h){$("mbox").innerHTML=h;$("modal").classList.add("on");}
+function closeModal(){$("modal").classList.remove("on");}
+function sparks(){
+  var cols=["#C9A24B","#E8C874","#C8633A","#7A2E2E","#E8DCC0"];
+  for(var i=0;i<28;i++){
+    var d=document.createElement("div");d.className="spark";
+    d.style.left=(Math.random()*100)+"vw";d.style.background=cols[i%5];
+    d.style.boxShadow="0 0 6px "+cols[i%5];
+    d.style.animationDelay=(Math.random()*0.5)+"s";
+    document.body.appendChild(d);
+    (function(el){setTimeout(function(){el.remove();},2300);})(d);
+  }
+}
+function fmtTime(ms){var h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000);return h>0?h+"h "+m+"m":m+"m";}
+function norm(s){return String(s).replace(/\s+/g," ").replace(/[\u201C\u201D]/g,'"').replace(/[\u2018\u2019]/g,"'").trim();}
+function normLoose(s){return norm(s).toLowerCase().replace(/ ?([=+\-*\/,:;(){}\[\]<>"']) ?/g,"$1").replace(/;$/,"");}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* ---- navigation ---- */
+var SCREENS=["home","level","lesson","ex","lab","stats","badges"];
+var NAVMAP={home:"home",lab:"lab",stats:"stats",badges:"badges"};
+function go(name){
+  for(var i=0;i<SCREENS.length;i++){$("s-"+SCREENS[i]).classList.remove("on");}
+  $("s-"+name).classList.add("on");
+  for(var k in NAVMAP){var b=$("n-"+NAVMAP[k]);if(b)b.classList.remove("act");}
+  // map several screens back to a nav highlight
+  var navFor={home:"home",level:"home",lesson:"home",ex:"home",lab:"lab",stats:"stats",badges:"badges"}[name];
+  if($("n-"+navFor))$("n-"+navFor).classList.add("act");
+  if(name==="home")renderMap();
+  if(name==="lab")renderLab();
+  if(name==="stats")renderStats();
+  if(name==="badges")renderBadges();
+  window.scrollTo(0,0);
+}
+
+/* ---- progress helpers ---- */
+function missionDone(mid){return !!S.missions[mid];}
+function levelCleared(L){for(var i=0;i<L.missions.length;i++){if(!missionDone(L.missions[i].id))return false;}return !!S.bosses[L.id];}
+function levelUnlocked(idx){if(idx===0)return true;return levelCleared(CONTENT[idx-1]);}
+function levelPct(L){var total=L.missions.length+1,done=0;for(var i=0;i<L.missions.length;i++){if(missionDone(L.missions[i].id))done++;}if(S.bosses[L.id])done++;return Math.round(done/total*100);}
+function levelsClearedCount(){var c=0;for(var i=0;i<CONTENT.length;i++){if(levelCleared(CONTENT[i]))c++;}return c;}
+var ROMAN=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+
+/* ---- render: map ---- */
+function renderMap(){
+  $("c-xp").textContent=S.xp;$("c-streak").textContent=S.streak;
+  var r=rankOf(S.xp),n=nextRank(S.xp);
+  $("rankname").textContent=r[1];
+  $("ranknext").textContent=n?(n[0]-S.xp)+" to "+n[1]:"MAX RANK";
+  var lo=r[0],hi=n?n[0]:(S.xp||1);
+  $("rankfill").style.width=Math.min(100,Math.round((S.xp-lo)/Math.max(1,hi-lo)*100))+"%";
+  var html="",lastPhase="";
+  for(var i=0;i<CONTENT.length;i++){
+    var L=CONTENT[i];
+    if(L.phase!==lastPhase){lastPhase=L.phase;html+='<div class="act-label">'+L.phase+'</div>';}
+    var unlocked=levelUnlocked(i),cleared=levelCleared(L),pct=levelPct(L);
+    html+='<button class="node'+(unlocked?"":" lock")+'" '+(unlocked?'onclick="openLevel('+i+')"':"disabled")+'>'
+      +'<div class="seal" style="background:linear-gradient(135deg,'+L.color+','+L.color2+')">'+ROMAN[i]+(cleared?'<span class="crown">♛</span>':'')+'</div>'
+      +'<div class="info"><div class="nm">'+L.name+'</div><div class="ds">'+L.month+' · '+L.tag+'</div>'
+      +(unlocked?'<div class="pct">'+(cleared?"◆ MASTERED":pct+"% forged")+'</div>':'<div class="pct" style="color:var(--mut)">🔒 sealed</div>')
+      +'</div></button>';
+  }
+  $("map").innerHTML=html;
+}
+
+/* ---- render: level ---- */
+var curL=0;
+function openLevel(i){
+  curL=i;var L=CONTENT[i];
+  $("lv-title").innerHTML="<span class='em'>"+ROMAN[i]+".</span> "+L.name;
+  $("lv-sub").innerHTML=L.month+" · "+L.tag+" — <b>"+L.desc+"</b>";
+  var html="";
+  for(var mi=0;mi<L.missions.length;mi++){
+    var m=L.missions[mi];
+    var unlocked=(mi===0)||missionDone(L.missions[mi-1].id);
+    var done=missionDone(m.id);
+    html+='<button class="mrow'+(done?" donem":"")+(unlocked?"":" lockm")+'" '+(unlocked?'onclick="openMission('+mi+')"':"disabled")+'>'
+      +'<div class="mi">'+(done?"✦":m.icon)+'</div><div><div class="mt">'+m.title+'</div>'
+      +'<div class="ms">'+m.ex.length+' trials'+(done?" · cleared — revisit":(unlocked?"":" · 🔒"))+'</div></div></button>';
+  }
+  var bossOpen=true;for(var k=0;k<L.missions.length;k++){if(!missionDone(L.missions[k].id))bossOpen=false;}
+  var bossDone=!!S.bosses[L.id];
+  html+='<button class="mrow'+(bossDone?" donem":"")+(bossOpen?"":" lockm")+'" '+(bossOpen?'onclick="openBoss()"':"disabled")+'>'
+    +'<div class="mi">'+(bossDone?"♛":"👹")+'</div><div><div class="mt">BOSS · '+L.boss.title+'</div>'
+    +'<div class="ms">'+L.boss.ex.length+' trials · pass '+L.boss.pass+'%'+(bossDone?" · vanquished":(bossOpen?"":" · clear all missions"))+'</div></div></button>';
+  $("mlist").innerHTML=html;
+  go("level");
+}
+
+/* ---- exercise flow (with progress preservation) ---- */
+var curM=0,mode="mission",queue=[],qi=0,sessionCombo=0,sessionSolved=0,roundCorrect=0,wrongOnce={},attemptUsed=false,selected=-1,parsonsPick=[];
+function openMission(mi){
+  curM=mi;mode="mission";
+  var L=CONTENT[curL],M=L.missions[mi];
+  $("ls-title").textContent=M.title;
+  $("ls-body").innerHTML=M.lesson;
+  $("lessonback").onclick=function(){openLevel(curL);};
+  go("lesson");
+}
+function openBoss(){
+  mode="boss";var L=CONTENT[curL];
+  openModal('<div class="big">👹</div><div class="deco">Boss Trial</div><h2>'+L.boss.title+'</h2><p>'+L.boss.ex.length+' trials drawn from this whole chapter. Score <b>'+L.boss.pass+'%+</b> to break the seal. No hints. The order shifts each attempt.</p><button class="forge-btn" onclick="closeModal();startEx()">ENTER</button>');
+}
+function startEx(){
+  var L=CONTENT[curL];
+  if(mode==="boss"){queue=shuffle(L.boss.ex);}
+  else{queue=L.missions[curM].ex.slice();}
+  qi=0;sessionCombo=0;roundCorrect=0;wrongOnce={};
+  $("exquit").onclick=function(){
+    // preserve: leaving mid-trial just returns to the level; mission only completes at the end
+    if(mode==="drill"||mode==="boss"){go("home");}
+    else{openLevel(curL);}
+  };
+  go("ex");renderEx();
+}
+function renderEx(){
+  var ex=queue[qi];
+  attemptUsed=false;selected=-1;parsonsPick=[];
+  $("exbar").style.width=Math.round(qi/queue.length*100)+"%";
+  $("excombo").textContent=sessionCombo>1?("⚡ x"+sessionCombo):"";
+  $("fb").className="feedback";$("hintbox").className="hintbox";$("hintbox").textContent=ex.h||"";
+  $("hintbtn").style.display=(ex.h&&mode!=="boss")?"block":"none";
+  var b=$("exmain");b.textContent="INSCRIBE";b.className="forge-btn";
+  var html='<div class="qtext">'+ex.q+'</div>';
+  if(ex.c)html+=codeBlock(ex.c);
+  if(ex.t==="mc"||ex.t==="bug"){
+    var opts=ex.t==="bug"?ex.c.split("\n").map(function(l,i){return "Line "+(i+1)+":  "+l;}):ex.o;
+    var oh='<div class="opts">';
+    for(var i=0;i<opts.length;i++){oh+='<button class="opt" data-i="'+i+'" onclick="pick(this)">'+esc(opts[i])+'</button>';}
+    html+=oh+'</div>';
+  }else if(ex.t==="fb"||ex.t==="po"){
+    html+='<input class="ans" id="ansin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="'+(ex.t==="po"?"the exact output…":"the missing code…")+'">';
+  }else if(ex.t==="ty"){
+    html+='<textarea class="ans" id="ansin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="inscribe it…"></textarea>';
+  }else if(ex.t==="pa"){
+    var idx=[];for(var n=0;n<ex.lines.length;n++)idx.push(n);idx=shuffle(idx);
+    html+='<div class="pbuild"><div class="lbl">Your sequence — tap to place · tap placed to remove</div><div id="pbuilt"></div></div><div class="plines">';
+    for(var y=0;y<idx.length;y++){html+='<button class="pline" data-i="'+idx[y]+'" onclick="pTap(this)">'+esc(ex.lines[idx[y]])+'</button>';}
+    html+='</div>';
+  }
+  $("exbody").innerHTML=html;
+  var inp=$("ansin");
+  if(inp){inp.addEventListener("keydown",function(e){if(e.key==="Enter"&&ex.t!=="ty"){e.preventDefault();exMain();}});setTimeout(function(){inp.focus();},100);}
+}
+function pick(el){
+  if($("exmain").textContent!=="INSCRIBE")return;
+  var sels=document.querySelectorAll(".opt");
+  for(var i=0;i<sels.length;i++)sels[i].classList.remove("sel");
+  el.classList.add("sel");selected=parseInt(el.getAttribute("data-i"),10);
+}
+function pTap(el){
+  if($("exmain").textContent!=="INSCRIBE")return;
+  var i=parseInt(el.getAttribute("data-i"),10);
+  if(el.parentElement.id==="pbuilt"){
+    var np=[];for(var k=0;k<parsonsPick.length;k++){if(parsonsPick[k]!==i)np.push(parsonsPick[k]);}
+    parsonsPick=np;el.remove();
+    var orig=document.querySelector('.plines .pline[data-i="'+i+'"]');if(orig)orig.classList.remove("used");
+  }else{
+    if(parsonsPick.indexOf(i)>=0)return;
+    parsonsPick.push(i);el.classList.add("used");
+    var c=document.createElement("button");c.className="pline";c.setAttribute("data-i",i);c.textContent=el.textContent;c.onclick=function(){pTap(c);};
+    $("pbuilt").appendChild(c);
+  }
+}
+function showHint(){$("hintbox").classList.add("on");}
+function exMain(){
+  var t=$("exmain").textContent;
+  if(t==="INSCRIBE")check();
+  else if(t==="CONTINUE ›")next();
+  else if(t==="TRY AGAIN")renderEx();
+}
+function check(){
+  var ex=queue[qi],ok=false;
+  if(ex.t==="mc"){if(selected<0){toast("choose a path");return;}ok=(selected===ex.a);}
+  else if(ex.t==="bug"){if(selected<0){toast("name the flaw");return;}ok=(selected===ex.a);if(ok)S.bugCount++;}
+  else if(ex.t==="fb"||ex.t==="po"||ex.t==="ty"){
+    var v=$("ansin")?$("ansin").value:"";if(!v.trim()){toast("inscribe an answer");return;}
+    if(ex.a&&ex.a[0]==="__FREE__"){ok=v.trim().length>=8;}
+    else{var acc=ex.a||[];for(var i=0;i<acc.length;i++){if(normLoose(v)===normLoose(acc[i])||norm(v)===norm(acc[i])){ok=true;break;}}}
+  }
+  else if(ex.t==="pa"){
+    if(parsonsPick.length!==ex.lines.length){toast("place every line");return;}
+    ok=true;for(var p=0;p<parsonsPick.length;p++){if(parsonsPick[p]!==p){ok=false;break;}}
+  }
+  var fb=$("fb");
+  if(ok){
+    var already=!!S.done[ex.id];
+    var base=(mode==="boss")?20:((ex.t==="pa"||ex.t==="ty")?15:10);
+    if(mode==="drill")base=8;
+    var gain=already?3:base;                 // replays pay little
+    sessionCombo++;var bonus=already?0:Math.min(10,(sessionCombo-1)*2);gain+=bonus;
+    S.xp+=gain;sessionSolved++;roundCorrect++;
+    if(!wrongOnce[qi]){S.ftOk++;S.ftTotal++;}
+    if(!S.done[ex.id]){S.done[ex.id]=1;if(S.solvedIds.indexOf(ex.id)<0)S.solvedIds.push(ex.id);}
+    if(!S.badges.first)award("first");
+    fb.className="feedback ok";$("fbhead").textContent="✦ TRUE  +"+gain+(bonus?"  (chain +"+bonus+")":"")+(already?"  (revisit)":"");
+    $("fbbody").innerHTML=ex.x||"";
+    var btn=$("exmain");btn.textContent="CONTINUE ›";btn.className="forge-btn sage";
+    if(ex.t==="mc"||ex.t==="bug"){var e1=document.querySelector('.opt[data-i="'+ex.a+'"]');if(e1)e1.classList.add("right");}
+  }else{
+    sessionCombo=0;
+    if(!wrongOnce[qi]){wrongOnce[qi]=1;S.ftTotal++;}
+    fb.className="feedback no";
+    if(!attemptUsed&&mode!=="boss"){
+      attemptUsed=true;
+      $("fbhead").textContent="✕ NOT YET — strike again";
+      $("fbbody").innerHTML=ex.h?("Hint: "+esc(ex.h)):"Look again, closely.";
+      var btn2=$("exmain");btn2.textContent="TRY AGAIN";btn2.className="forge-btn ghost";
+    }else{
+      $("fbhead").textContent="THE ANSWER";
+      var ans=ex.t==="mc"?ex.o[ex.a]:ex.t==="bug"?("Line "+(ex.a+1)):ex.t==="pa"?ex.lines.join("  →  "):((ex.a&&ex.a[0]==="__FREE__")?"(open answer)":(ex.a&&ex.a[0])||"");
+      $("fbbody").innerHTML="<b style='color:var(--gold-bright)'>"+esc(ans)+"</b><br>"+(ex.x||"");
+      if(ex.t==="mc"||ex.t==="bug"){var e2=document.querySelector('.opt[data-i="'+ex.a+'"]');if(e2)e2.classList.add("right");var sel=document.querySelector(".opt.sel");if(sel&&sel.getAttribute("data-i")!=String(ex.a))sel.classList.add("wrong");}
+      var btn3=$("exmain");btn3.textContent="CONTINUE ›";btn3.className="forge-btn";
+    }
+  }
+  touchStreak();checkBadges();persistNow();
+  $("c-xp").textContent=S.xp;$("c-streak").textContent=S.streak;
+}
+function next(){
+  qi++;
+  if(qi<queue.length){renderEx();return;}
+  $("exbar").style.width="100%";
+  if(mode==="boss"){
+    var L=CONTENT[curL];var pct=Math.round(roundCorrect/queue.length*100);
+    if(pct>=L.boss.pass){
+      S.bosses[L.id]=1;
+      if(!S.badges.boss1)award("boss1");
+      if(pct===100)award("perfect");
+      if(curL===3)award("shipped");if(curL===5)award("half");
+      if(levelsClearedCount()===12)award("legend");
+      persistNow();sparks();
+      openModal('<div class="big">♛</div><div class="deco">Seal Broken</div><h2>'+pct+'% — VICTORY</h2><p>Trial '+ROMAN[curL]+' is mastered. '+(curL<11?"Trial "+ROMAN[curL+1]+" now opens.":"<b>The path is complete. You have ascended.</b>")+'</p><button class="forge-btn" onclick="closeModal();go(\'home\')">RETURN TO THE PATH</button>');
+    }else{
+      openModal('<div class="big">💀</div><div class="deco">Repelled</div><h2>'+pct+'% — not enough</h2><p>The seal holds at '+L.boss.pass+'%. Revisit a mission, then challenge again — bosses never tire.</p><button class="forge-btn" onclick="closeModal();openLevel(curL)">RETREAT</button>');
+    }
+  }else if(mode==="drill"){
+    drillCount++;if(drillCount>=5)award("drill5");
+    persistNow();sparks();
+    openModal('<div class="big">🎯</div><div class="deco">Drill Complete</div><h2>'+roundCorrect+'/'+queue.length+' recalled</h2><p>Spaced repetition is how month-one knowledge survives to month nine. Return tomorrow.</p><button class="forge-btn" onclick="closeModal();go(\'home\')">DONE</button>');
+  }else{
+    var L2=CONTENT[curL];var M=L2.missions[curM];
+    S.missions[M.id]=1;
+    if(curL===0&&curM===0)award("hello");
+    persistNow();sparks();
+    openModal('<div class="big">✦</div><div class="deco">Mission Cleared</div><h2>'+M.title+'</h2><p>'+(curM<L2.missions.length-1?"The next mission opens.":"Only the BOSS remains.")+'</p><button class="forge-btn" onclick="closeModal();openLevel(curL)">CONTINUE</button>');
+  }
+}
+
+/* ---- Daily Drill: spaced recall from everything solved ---- */
+function startDrill(){
+  if(S.solvedIds.length<5){toast("clear ~5 trials first to unlock drills");return;}
+  var byId={};for(var i=0;i<CONTENT.length;i++){var L=CONTENT[i];for(var m=0;m<L.missions.length;m++){var M=L.missions[m];for(var e=0;e<M.ex.length;e++)byId[M.ex[e].id]=M.ex[e];}for(var be=0;be<L.boss.ex.length;be++)byId[L.boss.ex[be].id]=L.boss.ex[be];}
+  var pool=[];for(var s=0;s<S.solvedIds.length;s++){if(byId[S.solvedIds[s]])pool.push(byId[S.solvedIds[s]]);}
+  pool=shuffle(pool).slice(0,10);
+  if(!pool.length){toast("nothing to drill yet");return;}
+  mode="drill";queue=pool;qi=0;sessionCombo=0;roundCorrect=0;wrongOnce={};
+  $("exquit").onclick=function(){go("home");};
+  go("ex");renderEx();
+}
+
+/* ---- stats / relics / save UI ---- */
+function renderStats(){
+  var r=rankOf(S.xp),n=nextRank(S.xp);
+  $("st-rank").textContent=r[1];
+  $("st-ranknext").textContent=n?("next: "+n[1]+" at "+n[0]):"the summit — maximum rank";
+  $("st-xp").textContent=S.xp;$("st-time").textContent=fmtTime(S.timeMs);
+  $("st-streak").textContent=S.streak;$("st-best").textContent=S.bestStreak;
+  $("st-done").textContent=Object.keys(S.done).length;
+  $("st-acc").textContent=S.ftTotal?Math.round(S.ftOk/S.ftTotal*100)+"%":"—";
+  $("st-lvls").textContent=levelsClearedCount()+"/12";
+  $("st-labs").textContent=Object.keys(S.labs||{}).length+"/12";
+  var sb=$("savebanner");
+  if(saveMode==="memory"){
+    sb.className="savebanner warn";
+    sb.innerHTML="⚠ <b>Not saving.</b> You're viewing inside an app preview, which resets. To save forever: tap Share → <b>Open in Safari</b> (or save the file and open it from the Files app in Safari), then Add to Home Screen. Until then, EXPORT a soul code before leaving.";
+  }else if(saveMode==="local"){
+    sb.className="savebanner good";
+    sb.innerHTML="✦ <b>Saving to this device.</b> Progress persists in Safari. Add to Home Screen for an app-like home. For total safety across updates, EXPORT a soul code now and then.";
+  }else{
+    sb.className="savebanner good";
+    sb.innerHTML="✦ <b>Saving (synced).</b> Your progress is being stored automatically.";
+  }
+}
+function renderBadges(){
+  var h="";for(var i=0;i<BADGES.length;i++){var b=BADGES[i],got=!!S.badges[b[0]];
+    h+='<div class="badge'+(got?"":" locked")+'"><div class="bi">'+b[1]+'</div><div><div class="bn">'+b[2]+'</div><div class="bd">'+b[3]+'</div></div></div>';}
+  $("badgegrid").innerHTML=h;
+}
+function exportSave(){
+  var code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  openModal('<div class="deco">Soul Code</div><h2>Your Progress</h2><p>Copy this. Paste it via IMPORT on any device to restore everything.</p><textarea class="ans" style="min-height:130px" readonly onclick="this.select()">'+code+'</textarea><button class="forge-btn" onclick="closeModal()">DONE</button>');
+}
+function importSave(){
+  openModal('<div class="deco">Restore</div><h2>Import Soul Code</h2><p>Paste your code:</p><textarea class="ans" id="impbox" style="min-height:130px"></textarea><button class="forge-btn" onclick="doImport()">RESTORE</button><button class="forge-btn ghost" onclick="closeModal()">CANCEL</button>');
+}
+function doImport(){
+  try{var v=JSON.parse(decodeURIComponent(escape(atob($("impbox").value.trim()))));if(typeof v.xp!=="number")throw 0;S=migrate(v);persistNow();closeModal();go("home");toast("soul restored ✦");}catch(e){toast("invalid code");}
+}
+function resetSave(){
+  openModal('<div class="big">⚠️</div><h2>Erase everything?</h2><p>All essence, streaks, relics, and progress will be lost. This cannot be undone.</p><button class="forge-btn" style="background:linear-gradient(180deg,#a04030,#7A2E2E);color:#fff" onclick="doReset()">ERASE</button><button class="forge-btn ghost" onclick="closeModal()">KEEP</button>');
+}
+function doReset(){S={v:3,xp:0,timeMs:0,streak:0,bestStreak:0,lastDay:"",done:{},ftOk:0,ftTotal:0,missions:{},bosses:{},badges:{},todayKey:"",todayMs:0,bugCount:0,labs:{},solvedIds:[]};persistNow();closeModal();go("home");}
+
+var _id=0;function E(o){o.id="e"+(_id++);return o;}
+var CONTENT=[
+
+/* ===== L1 ===== */
+{id:"L1",name:"Python Zero",month:"JUN",tag:"values · print · variables",color:"#4D6BFF",color2:"#2a3a8f",phase:"PHASE 1 · FOUNDATIONS",desc:"Your first conversation with the machine.",
+missions:[
+{id:"L1M1",icon:"🖨️",title:"Talk to the machine",lesson:'<h3>LESSON · PRINT &amp; VALUES</h3><p>A program is a list of instructions the computer runs top to bottom. The first instruction everyone learns is <code>print()</code> — it shows something on screen.</p><pre>print("Hola, Pupu")</pre><p>Text in quotes is a <b>string</b>. Numbers without quotes are numbers — Python does real maths with them:</p><pre>print(2 + 3)      # shows 5\nprint("2" + "3")  # shows 23 — strings glue!</pre><p>That difference — <b>"2" is text, 2 is a number</b> — causes half of all beginner bugs. The <code>#</code> starts a comment: notes for humans, ignored by Python.</p>',
+ex:[
+E({t:"mc",q:"What does print() do?",o:["Sends text to a printer","Shows a value on the screen","Saves a file","Deletes a variable"],a:1,h:"Screen, not paper.",x:"print() displays values — your window into what the program is doing."}),
+E({t:"po",q:"What exactly does this show?",c:"print(3 * 4)",a:["12"],h:"* multiplies; no quotes = numbers.",x:"No quotes → real maths. Output: 12."}),
+E({t:"po",q:"And this one? Type the exact output.",c:'print("3" + "4")',a:["34"],h:"Quotes make them strings. + glues strings.",x:'"3"+"4" concatenates text → 34. Classic trap.'}),
+E({t:"fb",q:"Complete the line so it prints Hello:",c:'_____("Hello")',a:["print"],h:"The one function you just learned.",x:'print("Hello") — function name, parentheses, value inside.'}),
+E({t:"bug",q:"One line breaks. Which?",c:'print("Buy the dip")\nprint(Sell the rip)\nprint(42)',a:1,x:"Line 2 has no quotes, so Python reads Sell and rip as code. Strings need quotes."}),
+E({t:"ty",q:"Type a full line that prints the text One Piece (in double quotes).",a:['print("One Piece")'],h:"print, parentheses, quotes.",x:'print("One Piece") — you just wrote a program from a blank line.'})
+]},
+{id:"L1M2",icon:"📦",title:"Variables — boxes with names",lesson:'<h3>LESSON · VARIABLES</h3><p>A <b>variable</b> stores a value under a name so you can reuse it:</p><pre>dog = "Pupu"\nage = 4\nprint(dog)   # Pupu</pre><p><code>=</code> means <b>assign</b> (store), not maths-equals. Overwrite any time — the old value is gone:</p><pre>x = 5\nx = x + 2   # take current x, add 2, store back\nprint(x)    # 7</pre><p>Names: letters, numbers, underscores — but <b>never start with a number</b>, never contain spaces. <code>fx_rate</code> ✓ &nbsp;<code>2cool</code> ✗ &nbsp;<code>my rate</code> ✗</p>',
+ex:[
+E({t:"fb",q:"Store the text Pupu in a variable called dog:",c:'_____ = "Pupu"',a:["dog"],h:"The name goes left of =.",x:"name = value. Left is the label, right is the contents."}),
+E({t:"po",q:"What prints?",c:"x = 5\nx = x + 2\nprint(x)",a:["7"],h:"Line 2 replaces x with x+2.",x:"Variables hold the LATEST value assigned: 7."}),
+E({t:"mc",q:"Which is a valid variable name?",o:["2fast","fx rate","fx_rate","fx-rate"],a:2,h:"No spaces, no leading digit, no dash.",x:"fx_rate — underscores separate words in Python."}),
+E({t:"bug",q:"Find the broken line:",c:"price = 100\n2nd_price = 110\nprint(price)",a:1,x:"Names can't start with a digit. second_price works."}),
+E({t:"po",q:"Careful — what prints?",c:"a = 10\nb = a\na = 99\nprint(b)",a:["10"],h:"b copied the value BEFORE a changed.",x:"b took 10 at assignment time. Changing a later doesn't touch b."}),
+E({t:"ty",q:"Write one line storing the number 250000 in a variable called bonus (no quotes).",a:["bonus = 250000"],h:"name = number.",x:"bonus = 250000. No quotes: you want maths-able numbers."})
+]},
+{id:"L1M3",icon:"🧵",title:"Strings & f-strings",lesson:'<h3>LESSON · WORKING WITH TEXT</h3><p>Strings have tools. <code>len()</code> counts characters, <code>*</code> repeats, and the star — <b>f-strings</b> — drop variables straight into text:</p><pre>name = "Felix"\nprint(f"Hello, {name}!")   # Hello, Felix!\nprint(len("Baki"))          # 4\nprint("ha" * 3)             # hahaha</pre><p>The <code>f</code> before the quote turns on the magic: anything in <code>{curly braces}</code> is evaluated and inserted. You will use f-strings every day for 12 months — messages, logs, file names, prompts.</p>',
+ex:[
+E({t:"po",q:"Output?",c:'print(len("Pupu"))',a:["4"],h:"Count the characters.",x:"len() counts characters: P-u-p-u = 4."}),
+E({t:"fb",q:"Make it greet using the variable:",c:'name = "Felix"\nprint(f"Hola, {_____}!")',a:["name"],h:"The VARIABLE goes in the braces.",x:"f-strings evaluate what's inside {} — here, the variable."}),
+E({t:"po",q:"Output?",c:'print("go" * 3)',a:["gogogo"],h:"* repeats strings.",x:'"go"*3 → gogogo. Repetition, not multiplication.'}),
+E({t:"mc",q:'What does the f in f"..." enable?',o:["Faster printing","Putting {expressions} inside the string","French translation","File saving"],a:1,x:"f = formatted string: {expressions} get evaluated and embedded."}),
+E({t:"bug",q:"Spot the bug:",c:'dog = "Pupu"\nprint(f"My dog is {dog")\nprint("done")',a:1,x:"Missing closing brace: should be {dog}."}),
+E({t:"ty",q:'city holds "London". Type one f-string print line that outputs: I live in London',a:['print(f"I live in {city}")'],h:"f before the quote, {city} inside.",x:'print(f"I live in {city}") — your most-used pattern from now on.'})
+]}
+],
+boss:{title:"The Syntax Gate",pass:75,ex:[
+E({t:"po",q:"Output?",c:'x = "5"\nprint(x + x)',a:["55"],x:'x is a STRING. "5"+"5" → 55.'}),
+E({t:"mc",q:"Which line stores text?",o:['n = 42','n = "42"','n = 4.2','n = 42 + 1'],a:1,x:"Quotes make it a string, even if it looks numeric."}),
+E({t:"fb",q:"Print the value of total:",c:"total = 90\nprint(_____)",a:["total"],x:"No quotes — quotes would print the word total."}),
+E({t:"po",q:"Output?",c:"a = 2\na = a * a * a\nprint(a)",a:["8"],x:"2·2·2 = 8. The variable updates as it goes."}),
+E({t:"bug",q:"Find the bug:",c:'rate = 1.27\nprint(f"GBPUSD: {rate}")\nprint(f"Double: {rate * 2)',a:2,x:"Line 3 is missing the closing brace: {rate * 2}."}),
+E({t:"ty",q:"One line: print Day 1 using an f-string, where day = 1 already exists.",a:['print(f"Day {day}")'],x:'print(f"Day {day}") — variables into text, the everyday move.'})
+]}},
+
+/* ===== L2 ===== */
+{id:"L2",name:"Flow & Collections",month:"JUL",tag:"if · loops · lists · dicts",color:"#4D6BFF",color2:"#2a3a8f",phase:"PHASE 1 · FOUNDATIONS",desc:"Programs that decide and repeat.",
+missions:[
+{id:"L2M1",icon:"🔀",title:"Decisions: if / elif / else",lesson:'<h3>LESSON · BRANCHING</h3><p>Programs decide with <code>if</code>. The indented block runs only when the condition is True:</p><pre>price = 105\nif price > 100:\n    print("expensive")\nelif price == 100:\n    print("at par")\nelse:\n    print("cheap")</pre><p>Burn in three things: <b>(1)</b> the colon ends the condition line, <b>(2)</b> <b>indentation IS the syntax</b> — 4 spaces define what belongs to the if, <b>(3)</b> comparison is <code>==</code>; a single <code>=</code> assigns. Operators: <code>&gt; &lt; &gt;= &lt;= == !=</code> plus <code>and</code> / <code>or</code> / <code>not</code>.</p>',
+ex:[
+E({t:"mc",q:"Which symbol COMPARES two values?",o:["=","==","=>","equals"],a:1,x:"== compares, = assigns. Mixing them is a rite of passage."}),
+E({t:"po",q:"Output?",c:'score = 3\nif score >= 5:\n    print("hawk")\nelse:\n    print("dove")',a:["dove"],h:"Is 3 >= 5?",x:"False → else branch → dove."}),
+E({t:"fb",q:"The keyword for the otherwise-if branch:",c:'if x > 0:\n    print("pos")\n_____ x == 0:\n    print("zero")',a:["elif"],x:"elif = else-if: checked only when the first condition failed."}),
+E({t:"bug",q:"Find the bug:",c:'temp = 30\nif temp > 25\n    print("hot")',a:1,x:"Missing colon: if temp > 25:"}),
+E({t:"mc",q:"a = 7. What does this print?  if a > 5 and a < 10: print(\"mid\")",o:["Nothing","mid","Error","5 and 10"],a:1,x:"7 is between 5 and 10, both sides True → mid."}),
+E({t:"ty",q:"Write the FIRST line only of an if checking whether pnl is less than 0 (include the colon).",a:["if pnl < 0:"],h:"if … comparison … colon",x:"if pnl < 0: — condition line, then indented consequences."})
+]},
+{id:"L2M2",icon:"📋",title:"Lists & for-loops",lesson:'<h3>LESSON · LISTS</h3><p>A <b>list</b> holds many values in order:</p><pre>desks = ["rates", "fx", "credit"]\nprint(desks[0])      # rates — counting starts at 0!\ndesks.append("eq")   # add to the end\nprint(len(desks))    # 4</pre><p>A <code>for</code> loop visits each item:</p><pre>for d in desks:\n    print(d)</pre><p>And <code>range(n)</code> yields 0…n-1. <b>Index from 0</b> is the universal rule: desks[1] is the SECOND item.</p>',
+ex:[
+E({t:"po",q:"Output?",c:'banks = ["fed", "ecb", "boe"]\nprint(banks[1])',a:["ecb"],h:"Index 1 = second item.",x:"[0]=fed, [1]=ecb, [2]=boe."}),
+E({t:"fb",q:'Add "boj" to the end:',c:'banks = ["fed", "ecb"]\nbanks._____("boj")',a:["append"],x:".append(x) adds to the end — the most common list operation."}),
+E({t:"po",q:"Output?",c:"total = 0\nfor n in [10, 20, 30]:\n    total = total + n\nprint(total)",a:["60"],h:"Adds each item to total.",x:"0+10+20+30 → 60. THE accumulation pattern."}),
+E({t:"mc",q:"range(4) produces…",o:["1,2,3,4","0,1,2,3","0,1,2,3,4","4 random numbers"],a:1,x:"range(n) = 0 up to n-1."}),
+E({t:"bug",q:"Find the bug:",c:'trades = ["buy", "sell"]\nfor t in trades:\nprint(t)',a:2,x:"Loop body must be indented: print(t) needs 4 spaces."}),
+E({t:"pa",q:"Order the lines: build a list, add an item, print its length.",lines:["prices = [101, 102]","prices.append(103)","print(len(prices))"],x:"Create → modify → inspect. len returns 3."})
+]},
+{id:"L2M3",icon:"🗂️",title:"Dictionaries — labelled data",lesson:'<h3>LESSON · DICTS</h3><p>A <b>dictionary</b> maps keys to values:</p><pre>rate = {"fed": 4.25, "ecb": 2.15}\nprint(rate["fed"])     # 4.25\nrate["boe"] = 4.0      # add or update\nfor bank, r in rate.items():\n    print(f"{bank}: {r}")</pre><p>Dicts are how real data arrives — API responses, configs, database rows. A missing key with <code>[ ]</code> crashes; <code>rate.get("boj")</code> returns None safely. Lists = ordered position. Dicts = lookup by name.</p>',
+ex:[
+E({t:"po",q:"Output?",c:'fx = {"GBPUSD": 1.27, "EURUSD": 1.08}\nprint(fx["EURUSD"])',a:["1.08"],x:"Square brackets with the KEY fetch the value."}),
+E({t:"fb",q:'Add key "boe" with value 4.0:',c:'rate = {"fed": 4.25}\nrate[_____] = 4.0',a:['"boe"',"'boe'"],h:"Text keys need quotes.",x:'rate["boe"] = 4.0 — same syntax adds or updates.'}),
+E({t:"mc",q:"Asking a dict for a missing key with [ ] does what?",o:["Returns 0","Returns None","Crashes with KeyError","Creates the key"],a:2,x:"KeyError crash. Use .get(key) when it might be missing."}),
+E({t:"po",q:"Output?",c:'d = {"a": 1}\nd["a"] = d["a"] + 10\nprint(d["a"])',a:["11"],x:"Read 1, add 10, store back."}),
+E({t:"mc",q:"Storing one FOMC statement with its date, bank, and score — best structure?",o:["A list [date, bank, score]",'A dict {"date":…, "bank":…, "score":…}',"Three separate variables","One long string"],a:1,x:"A dict labels each field by name. A LIST of these dicts is your future database."}),
+E({t:"ty",q:'Type one line that prints the value for key "score" from dict doc.',a:['print(doc["score"])',"print(doc['score'])"],x:'print(doc["score"]) — fetch by key, print it.'})
+]}
+],
+boss:{title:"The Logic Gauntlet",pass:75,ex:[
+E({t:"po",q:"Output?",c:'x = 10\nif x > 5:\n    if x > 8:\n        print("big")\n    else:\n        print("mid")',a:["big"],x:"Nested ifs: 10>5 ✓ then 10>8 ✓ → big."}),
+E({t:"po",q:"Output?",c:"s = 0\nfor i in range(4):\n    s = s + i\nprint(s)",a:["6"],x:"0+1+2+3 = 6. range(4) stops BEFORE 4."}),
+E({t:"bug",q:"Find the bug:",c:"scores = [3, -2, 5]\nfor s in scores\n    print(s)",a:1,x:"Missing colon: for s in scores:"}),
+E({t:"fb",q:"Count hawkish (positive) scores:",c:"count = 0\nfor s in [2, -1, 3]:\n    if s _____ 0:\n        count = count + 1\nprint(count)   # should print 2",a:[">"],x:"s > 0 marks hawkish. Two positives → 2."}),
+E({t:"mc",q:'banks = ["fed","ecb","boe"] — what is banks[2]?',o:["fed","ecb","boe","crash"],a:2,x:"[2] is the THIRD item: boe."}),
+E({t:"pa",q:"Order: dict of rates → loop items → print each as bank: rate.",lines:['rates = {"fed": 4.25, "boe": 4.0}',"for bank, r in rates.items():",'    print(f"{bank}: {r}")'],x:".items() yields (key, value) pairs — the standard dict loop."})
+]}},
+
+/* ===== L3 ===== */
+{id:"L3",name:"Functions, Files & Git",month:"AUG",tag:"def · errors · terminal",color:"#4D6BFF",color2:"#2a3a8f",phase:"PHASE 1 · FOUNDATIONS",desc:"Reusable code, surviving crashes, tools of the trade.",
+missions:[
+{id:"L3M1",icon:"🧩",title:"Functions",lesson:'<h3>LESSON · DEF &amp; RETURN</h3><p>A <b>function</b> packages logic — write once, use forever:</p><pre>def dv01(notional, bps=1):\n    return notional * bps * 0.0001\n\nrisk = dv01(1000000)      # 100.0\nrisk2 = dv01(1000000, 2)  # 200.0</pre><p>Anatomy: <code>def name(parameters):</code> → indented body → <code>return</code> sends a value back. <code>bps=1</code> is a <b>default</b>, used when the caller omits it. Key distinction: <b>print shows, return gives back.</b> No return → the function returns None.</p>',
+ex:[
+E({t:"fb",q:"Complete the definition keyword:",c:"_____ double(x):\n    return x * 2",a:["def"],x:"def starts every function definition."}),
+E({t:"po",q:"Output?",c:"def add(a, b):\n    return a + b\nprint(add(3, 4))",a:["7"],x:"Call with 3 and 4 → returns 7 → printed."}),
+E({t:"po",q:"Tricky — output?",c:"def f(x):\n    x * 2\nprint(f(5))",a:["None"],h:"What does f give BACK?",x:"No return → returns None. It computed 10 and threw it away."}),
+E({t:"mc",q:"The benefit of a default like bps=1:",o:["Faster code","Caller can omit it; a sensible fallback applies","It makes bps constant","It documents the type"],a:1,x:"Convenient for the common case, flexible for the rest."}),
+E({t:"bug",q:"Find the bug:",c:"def pnl(buy, sell):\nreturn sell - buy\nprint(pnl(100, 105))",a:1,x:"The body must be indented: return needs 4 spaces under def."}),
+E({t:"ty",q:"Define a function called square that takes n and returns n * n (two lines).",a:["def square(n):\n    return n * n","def square(n):\nreturn n * n"],h:"def line with colon, then indented return.",x:"def square(n): / return n * n — write this shape 1,000 times this year."})
+]},
+{id:"L3M2",icon:"🛟",title:"Errors & files",lesson:'<h3>LESSON · CRASHING GRACEFULLY</h3><p>Real programs meet bad data. <code>try/except</code> catches the crash:</p><pre>try:\n    rate = float("abc")\nexcept ValueError:\n    print("not a number, skipping")</pre><p>Reading errors: a <b>traceback</b> reads bottom-up — the LAST line names the error (ValueError, KeyError, IndexError…). Files use <code>with</code>, which auto-closes:</p><pre>with open("notes.txt", "w") as f:\n    f.write("day 1")\nwith open("notes.txt") as f:\n    text = f.read()</pre><p>Mode <code>"w"</code> writes (overwrites!), <code>"a"</code> appends, default reads.</p>',
+ex:[
+E({t:"mc",q:"The MOST useful line of a traceback is…",o:["The first line","The last — it names the error and message","The longest","The one with the file path"],a:1,x:"Bottom line = error type + message. Read it FIRST, always."}),
+E({t:"fb",q:"Catch the conversion failure:",c:"try:\n    x = float(text)\n_____ ValueError:\n    x = 0.0",a:["except"],x:"try the risky thing, except the specific error you expect."}),
+E({t:"po",q:"Output?",c:'try:\n    print(10 / 0)\nexcept ZeroDivisionError:\n    print("nope")',a:["nope"],x:"Divide by zero → error raised → caught → nope."}),
+E({t:"mc",q:"Why  with open(...) as f:  instead of plain open?",o:["Speed","The file auto-closes even when errors happen","Encryption","Windows-only feature"],a:1,x:"with guarantees cleanup; forgotten open files cause weird bugs."}),
+E({t:"mc",q:'A log script uses open("log.txt", "w") each run and history keeps vanishing. Why?',o:['"w" overwrites the file every run — append mode is "a"',"Logs expire","The file is too big","Python deletes old files"],a:0,x:'"w" truncates. "a" appends. One-letter bug, hours of confusion — now immunised.'}),
+E({t:"mc",q:"Your scraper hits one malformed page out of 90. Best design?",o:["Let it crash, rerun later","try/except around per-page parsing: log the failure, continue the loop","Wrap the WHOLE program in one try","Ignore errors entirely"],a:1,x:"Catch narrowly, log, continue. One bad input must not kill a 90-page run — MacroLens-critical."})
+]},
+{id:"L3M3",icon:"⌨️",title:"Terminal & git",lesson:'<h3>LESSON · THE TOOLS</h3><p>The terminal is home. Survival kit: <code>pwd</code> (where am I), <code>ls</code> (what is here), <code>cd folder</code> (move), <code>python3 file.py</code> (run).</p><p><b>Git</b> = version control, snapshots of your code. The eternal cycle:</p><pre>git status              # what changed?\ngit add .               # stage everything\ngit commit -m "msg"     # snapshot with message\ngit push                # upload to GitHub</pre><p>Per-project isolation with <b>venv</b>: <code>python3 -m venv .venv</code> then <code>source .venv/bin/activate</code>. One project, one environment.</p>',
+ex:[
+E({t:"ty",q:"Type the command that shows which files changed since the last commit.",a:["git status"],x:"git status — run it constantly; it is free and tells you everything."}),
+E({t:"pa",q:"Order the commit cycle:",lines:["git add .",'git commit -m "add fx tool"',"git push"],x:"stage → snapshot → upload. The rhythm of every coding day."}),
+E({t:"mc",q:"A commit is…",o:["A full computer backup","A named snapshot of staged changes","A message to your team","A deployment"],a:1,x:"Snapshot + message. Your project history is a chain of commits."}),
+E({t:"ty",q:"Type the command that runs the file scrape.py with Python 3.",a:["python3 scrape.py","python scrape.py"],x:"python3 scrape.py — code leaves the editor and actually runs."}),
+E({t:"mc",q:"Why a venv per project?",o:["Speed","Each project gets its own package versions — no conflicts","GitHub requires it","Security"],a:1,x:"Project A needs requests v2, project B v3? venvs keep them apart."}),
+E({t:"fb",q:"Install the requests package into the ACTIVE venv:",c:"_____ install requests",a:["pip"],x:"pip install <package> — then pip freeze > requirements.txt."})
+]}
+],
+boss:{title:"The Foundation Boss",pass:75,ex:[
+E({t:"po",q:"Output?",c:"def fee(amount, rate=0.01):\n    return amount * rate\nprint(fee(200))",a:["2.0","2"],x:"Default rate 0.01 → 200·0.01 = 2.0."}),
+E({t:"mc",q:"avg([1,2,3]) crashes when written avg[1, 2, 3]. Why?",o:["Lists are immutable","Functions are CALLED with parentheses; square brackets index","avg is reserved","Python 3 quirk"],a:1,x:"call = parentheses. avg([1,2,3]): parens to call, brackets for the list inside."}),
+E({t:"mc",q:"KeyError at the bottom of a traceback means…",o:["A file is missing","You asked a dict for a key it does not have","Keyboard disconnected","Loop ran too long"],a:1,x:"Missing dict key — and the message shows WHICH key. Read it."}),
+E({t:"ty",q:"Type the command creating a snapshot with the message: day 30",a:['git commit -m "day 30"',"git commit -m 'day 30'"],x:"git commit -m \"day 30\" — muscle memory by now."}),
+E({t:"po",q:"Output?",c:'try:\n    d = {"a": 1}\n    print(d["b"])\nexcept KeyError:\n    print("missing")',a:["missing"],x:'No key "b" → KeyError → caught → missing.'}),
+E({t:"pa",q:"Order a tiny script: define a function, call it into a variable, print it.",lines:["def double(x):","    return x * 2","result = double(21)","print(result)"],x:"Define before use, store the return, show it. Output: 42."})
+]}},
+
+/* ===== L4 ===== */
+{id:"L4",name:"APIs, JSON & SQLite",month:"SEP",tag:"requests · json · sql — SHIP",color:"#FFB300",color2:"#9c6a12",phase:"PHASE 2 · FIRST SHIP — MACROLENS",desc:"Fetch real data from the internet and store it properly.",
+missions:[
+{id:"L4M1",icon:"🌐",title:"HTTP & requests",lesson:'<h3>LESSON · TALKING TO THE INTERNET</h3><p>An <b>API</b> is a website for programs. Send a request, get structured data:</p><pre>import requests\nr = requests.get("https://api.frankfurter.dev/v1/latest?base=GBP")\nprint(r.status_code)   # 200 = OK\ndata = r.json()        # parse JSON body into dicts/lists</pre><p>Status codes: <b>200</b> OK · <b>404</b> not found · <b>429</b> slow down! · <b>500</b> their server broke. Scraping etiquette (MacroLens rules): <code>time.sleep(1)</code> between requests, set a User-Agent header, and <b>cache downloads</b> — never re-fetch what you already have.</p>',
+ex:[
+E({t:"mc",q:"Status code 200 means…",o:["Error","OK — request succeeded","Redirect","Rate limited"],a:1,x:"200 = success. Check it BEFORE trusting the body."}),
+E({t:"fb",q:"Parse the response body into Python data:",c:"r = requests.get(url)\ndata = r._____()",a:["json"],x:".json() converts the JSON text into dicts and lists."}),
+E({t:"mc",q:"You get 429 from a central-bank site. It means…",o:["Page moved","Too many requests — back off, add sleep + caching","Python outdated","Auth failed"],a:1,x:"429 = rate limited. Be a polite robot."}),
+E({t:"mc",q:"Why cache downloaded statements to disk?",o:["Disk is prettier","Re-runs are instant, you stop hammering their server, and you can work offline","JSON requires it","Git needs files"],a:1,x:"Cache-first scraping: fast, polite, reproducible."}),
+E({t:"mc",q:"A fetch loop with no time.sleep between requests is…",o:["Efficient","Rude and risky — you may get rate-limited or blocked; add sleep(1) in the loop","Required for speed","Fine for government sites"],a:1,x:"One second of manners per request keeps MacroLens welcome everywhere."}),
+E({t:"ty",q:"Type the import line for the requests library.",a:["import requests"],x:"import requests — the doorway to the internet."})
+]},
+{id:"L4M2",icon:"🧬",title:"Navigating JSON",lesson:'<h3>LESSON · JSON = DICTS + LISTS</h3><p>APIs answer in <b>JSON</b>, which maps exactly to Python: objects→dicts, arrays→lists. Navigation = chained keys/indexes:</p><pre>data = {\n  "base": "GBP",\n  "rates": {"USD": 1.27, "EUR": 1.17},\n  "history": [\n     {"date": "2026-06-01", "USD": 1.26}\n  ]\n}\nprint(data["rates"]["USD"])        # 1.27\nprint(data["history"][0]["date"])  # 2026-06-01</pre><p>Skill: <b>read the shape first</b> (dict or list at this level?), then chain step by step. Unsure? Print one level at a time.</p>',
+ex:[
+E({t:"po",q:"Output?",c:'data = {"rates": {"USD": 1.27}}\nprint(data["rates"]["USD"])',a:["1.27"],x:"Dict inside a dict: two key-steps."}),
+E({t:"fb",q:"Get the FIRST history entry:",c:'d = data["history"][_____]["date"]',a:["0"],x:"Lists index from 0."}),
+E({t:"po",q:"Output?",c:'docs = [{"bank": "fed", "score": 2}, {"bank": "ecb", "score": -1}]\nprint(docs[1]["bank"])',a:["ecb"],x:"[1] = second dict; then key bank."}),
+E({t:"mc",q:'data["results"] is a LIST of dicts. How do you print every score?',o:['print(data["results"]["score"])','for d in data["results"]: print(d["score"])',"print(score)","data.results.score"],a:1,x:"Loop the list, key into each dict. Lists need loops; dicts need keys."}),
+E({t:"bug",q:"Find the bug:",c:'r = requests.get(url)\ndata = r.json\nprint(data["rates"])',a:1,x:"Missing parentheses: r.json is the function itself; r.json() CALLS it."}),
+E({t:"ty",q:'resp holds {"meeting": {"date": "2026-09-17"}}. Type one line printing the date.',a:['print(resp["meeting"]["date"])',"print(resp['meeting']['date'])"],x:"Chain the keys, print the leaf. Daily work in P2."})
+]},
+{id:"L4M3",icon:"🗄️",title:"SQLite — your first database",lesson:'<h3>LESSON · WHY A DATABASE</h3><p>Files are fine until you need to <i>ask questions</i> of data. SQLite ships with Python — zero install:</p><pre>import sqlite3\ncon = sqlite3.connect("macrolens.db")\ncur = con.cursor()\ncur.execute("CREATE TABLE IF NOT EXISTS scores (bank TEXT, date TEXT, score REAL)")\ncur.execute("INSERT INTO scores VALUES (?, ?, ?)", ("fed", "2026-09-17", 2.0))\ncon.commit()\nrows = cur.execute("SELECT * FROM scores WHERE bank = ?", ("fed",)).fetchall()</pre><p>The <code>?</code> placeholders pass values <b>safely</b> — never glue data into SQL strings (that is how injection attacks happen). <code>commit()</code> makes writes permanent.</p>',
+ex:[
+E({t:"mc",q:"When does a database beat a CSV?",o:["Never","When you need to query, filter, and update reliably","Only at big tech","When data is text"],a:1,x:'"All Fed scores above 2 since 2024" is one SELECT — vs a fragile homemade CSV loop.'}),
+E({t:"fb",q:"Fetch only Fed rows:",c:'cur.execute("SELECT * FROM scores _____ bank = ?", ("fed",))',a:["WHERE","where"],x:"WHERE filters rows — the workhorse keyword."}),
+E({t:"mc",q:"Why ? placeholders instead of f-strings in SQL?",o:["Speed","Prevents SQL injection and quoting bugs","Looks professional","f-strings cannot hold text"],a:1,x:"Parameterised queries, always. String-glued SQL is THE classic security hole."}),
+E({t:"mc",q:"Inserts succeed but rows vanish after the script ends. Missing step?",o:["con.commit() after writing","More RAM","A bigger table","fetchall()"],a:0,x:"Uncommitted writes are discarded. insert → commit → close."}),
+E({t:"pa",q:"Order the database session:",lines:['con = sqlite3.connect("app.db")',"cur = con.cursor()",'cur.execute("INSERT INTO scores VALUES (?,?,?)", row)',"con.commit()"],x:"connect → cursor → execute → commit. The four-step write."}),
+E({t:"mc",q:"MacroLens: documents(id, bank, date, path) and scores(doc_id, score, model). Why two tables?",o:["SQLite max is 2","One fact per table: a document exists once; it may be scored many times (models, prompt versions)","Pairs are faster","Backups"],a:1,x:"Re-scoring with prompt v2 never duplicates documents. Schema design = thinking ahead."})
+]}
+],
+boss:{title:"The Pipeline Boss",pass:75,ex:[
+E({t:"pa",q:"Order the MacroLens v1 ingestion pipeline:",lines:["fetch the statement URL with requests","check status_code == 200","save raw text to data/fed/DATE.txt","insert metadata row into SQLite","commit"],x:"Fetch → verify → cache → index → commit. You just designed your September ship."}),
+E({t:"po",q:"Output?",c:'data = {"results": [{"s": 1}, {"s": 4}]}\ntotal = 0\nfor d in data["results"]:\n    total = total + d["s"]\nprint(total)',a:["5"],x:"Loop the list, sum the key: 1+4=5."}),
+E({t:"mc",q:"Status 200 but r.json() crashes. Most likely?",o:["Python broken","Body is not JSON — an HTML page came back; inspect r.text","200 means error","Must use POST"],a:1,x:"200 ≠ JSON. Error pages arrive with 200 too."}),
+E({t:"fb",q:"Polite delay inside the fetch loop:",c:"import time\nfor url in urls:\n    fetch(url)\n    time._____(1)",a:["sleep"],x:"time.sleep(1) — one second of manners per request."}),
+E({t:"ty",q:"Type SQL selecting everything from scores where score > 0.",a:["SELECT * FROM scores WHERE score > 0","SELECT * FROM scores WHERE score > 0;","select * from scores where score > 0"],x:"SELECT … FROM … WHERE … — the sentence pattern of SQL."}),
+E({t:"mc",q:"Sep 13 arrives; the dashboard is ugly but works. You…",o:["Delay until beautiful","Ship it — live and imperfect beats polished and local","Restart in a new framework","Make it private"],a:1,x:"RULE: ship embarrassing, iterate live. The deadline exists to defeat perfectionism."})
+]}},
+
+/* ===== L5 ===== */
+{id:"L5",name:"LLM Engineering I",month:"OCT",tag:"API calls · prompts · evals",color:"#FFB300",color2:"#9c6a12",phase:"PHASE 2 · FIRST SHIP — MACROLENS",desc:"Make a model read the Fed — and prove whether it is right.",
+missions:[
+{id:"L5M1",icon:"🤖",title:"Anatomy of an LLM call",lesson:'<h3>LESSON · THE API CALL</h3><p>Calling Claude from code is a structured request:</p><pre>from anthropic import Anthropic\nclient = Anthropic()   # key from environment\nmsg = client.messages.create(\n    model="claude-sonnet-4-6",\n    max_tokens=500,\n    system="You are a central-bank analyst.",\n    messages=[{"role": "user", "content": text}]\n)\nprint(msg.content[0].text)</pre><p>Parts: <b>model</b> (which brain), <b>max_tokens</b> (output budget), <b>system</b> (standing instructions), <b>messages</b> (the conversation). Your key lives in <code>.env</code>, which is in <code>.gitignore</code> — <b>a key pushed to GitHub is compromised in minutes.</b></p>',
+ex:[
+E({t:"mc",q:"Where does the API key live?",o:["Hardcoded in the script","In a .env file listed in .gitignore","In the README","In the database"],a:1,x:"Environment variables, never source code. Bots scrape leaked keys in minutes."}),
+E({t:"fb",q:"Set the standing instruction:",c:'client.messages.create(\n    model="claude-sonnet-4-6",\n    max_tokens=500,\n    _____="Respond with JSON only.",\n    messages=[...])',a:["system"],x:"system sets persistent behaviour for the whole call."}),
+E({t:"mc",q:"max_tokens controls…",o:["Input size","Maximum length of the OUTPUT","Temperature","Cost per token"],a:1,x:"Caps response length — and the output cost of the call."}),
+E({t:"mc",q:"Tokens are…",o:["Login credentials","Word-pieces — the units models read, write, and bill by","Megabytes","API keys"],a:1,x:"~4 characters each. Input + output tokens = your bill. Log them."}),
+E({t:"bug",q:"Spot the career-limiting bug:",c:'API_KEY = "sk-ant-abc123realkey"\nclient = Anthropic(api_key=API_KEY)\nresult = score(statement)',a:0,x:"A real key in source code. Load from environment instead; gitignore the .env."}),
+E({t:"mc",q:'The role field in messages exists because…',o:["Decoration","Conversations alternate user/assistant turns; role marks who said what","JSON requires it","Permissions"],a:1,x:"Multi-turn context = a list of role-tagged messages."})
+]},
+{id:"L5M2",icon:"📜",title:"Prompts as engineering artifacts",lesson:'<h3>LESSON · PROMPTS ARE CODE</h3><p>In MacroLens the prompt IS the product. Treat it like code: <b>a versioned file</b> (<code>prompts/hawk_dove_v1.txt</code>), changed deliberately, compared by results. A scoring prompt that works:</p><pre>Read the statement below.\nRespond with ONLY this JSON, no other text:\n{"score": -5..5, "confidence": 0-1,\n "key_phrases": [...]}\n\n-5 = maximally dovish, +5 = maximally hawkish.</pre><p>Principles: <b>be explicit</b> about format, <b>constrain output</b> (JSON only), give the <b>scale meaning</b>. Temperature ≈ randomness: low (0–0.3) for scoring/extraction. If the model chats around your JSON — tighten the prompt, do not write a fragile parser.</p>',
+ex:[
+E({t:"mc",q:"Why version prompts as files?",o:["Files are faster","Change, compare (v1 vs v2), roll back deliberately — like any code","GitHub requires it","Strings have length limits"],a:1,x:"prompt_version goes in your scores table. 'v2 beat v1 by 6%' is an engineering sentence."}),
+E({t:"mc",q:"For hawk-dove SCORING, temperature should be…",o:["High — creativity","Low (≈0–0.3) — same input should give the same score","Exactly 1.0","Irrelevant"],a:1,x:"Scoring is measurement. Randomness in a measuring instrument is a defect."}),
+E({t:"mc",q:"Model wraps your JSON in chatty text. Best fix?",o:["Regex forever","Tighten the prompt: ONLY the JSON object, no other text (and/or structured output)","Lower max_tokens","Accept it"],a:1,x:"Fix at the source. Constrained prompts beat fragile post-parsing."}),
+E({t:"fb",q:"Pin the scale:",c:"Score the statement from -5 to +5.\n-5 = maximally _____, +5 = maximally hawkish.",a:["dovish"],x:"Undefined scales drift. Anchor both ends."}),
+E({t:"mc",q:"Same statement scored 3 times: +2, +2, +3. This tells you…",o:["Model broken","Consistency is decent; tighten prompt/temperature if you need tighter","Take the max","Re-run until you like it"],a:1,x:"You just ran a consistency eval — measuring the instrument before trusting it."}),
+E({t:"ty",q:"Prompt changed meaningfully. Type the new filename (v2) following prompts/hawk_dove_vN.txt",a:["prompts/hawk_dove_v2.txt"],x:"Version bumps make experiments comparable."})
+]},
+{id:"L5M3",icon:"📐",title:"Measure: cost, latency, back-tests",lesson:'<h3>LESSON · NUMBERS OR IT DID NOT HAPPEN</h3><p>Three measurements turn a demo into engineering. <b>1 · Cost</b> — log input/output tokens per call into the scores table. <b>2 · Latency</b> — wrap calls in a timer; users feel seconds. <b>3 · Accuracy via back-test</b> — for each score, look up the NEXT meeting&#39;s actual decision: hawkish → did they hike/hold? Compute the <b>hit rate</b> and compare to the dumb baseline <b>&quot;always predict no change&quot;</b>. If you do not beat the baseline, say so — <i>a negative result measured properly beats an unmeasured demo</i>, and the misses become your write-up.</p>',
+ex:[
+E({t:"mc",q:"Why log cost per call from day one?",o:["Tax","Costs compound silently; logs let you compare models and optimise later","API requires it","To slow code"],a:1,x:"'Haiku-tier was 8x cheaper at 95% accuracy' — that sentence comes from logs and gets people hired."}),
+E({t:"mc",q:"The back-test core comparison is…",o:["Score vs other models","Score direction vs the NEXT actual rate decision","Score vs Twitter","Tokens vs latency"],a:1,x:"Prediction vs outcome — the essence of every back-test."}),
+E({t:"mc",q:"LLM hits 64%; 'always hold' hits 71%. You…",o:["Hide the baseline","Report both honestly; investigate the misses — that is the interesting work","Delete the project","Raise temperature"],a:1,x:"Baselines keep you honest. The misses ARE the write-up."}),
+E({t:"mc",q:"A confusion matrix shows…",o:["Confused users","Predicted vs actual in a grid — where the model is right and HOW it is wrong","API errors","Token counts"],a:1,x:"Per-cell failure patterns beat a single average."}),
+E({t:"po",q:"Predictions [hike,hold,cut,hike] vs actuals [hike,hold,hike,hike]. Hit rate? (like 75%)",a:["75%","75"],x:"3 of 4 → 75%."}),
+E({t:"mc",q:"What belongs in each scores row for comparable experiments?",o:["Just the score","score + model + prompt_version + tokens + latency + timestamp","A screenshot","The full statement again"],a:1,x:"Capture the experiment context. Future-you asks: which combo wins?"})
+]}
+],
+boss:{title:"The MacroLens Boss",pass:75,ex:[
+E({t:"pa",q:"Order the full scoring run:",lines:["load unscored documents from SQLite","load prompts/hawk_dove_v2.txt","call the LLM with the statement text","validate the returned JSON","insert score + cost + latency","commit"],x:"The actual loop you ship in October — readable as a sentence."}),
+E({t:"mc",q:"Broken JSON for 1 in 50 docs. Production response?",o:["Crash the run","try/except: log doc id, retry once or skip, continue the batch","Re-run everything","Ignore validity"],a:1,x:"Expected failure → handled failure. L3 skills, earning money."}),
+E({t:"po",q:"Output?",c:'usage = {"input_tokens": 1200, "output_tokens": 80}\nprint(usage["input_tokens"] + usage["output_tokens"])',a:["1280"],x:"Token accounting = two dict reads and a plus."}),
+E({t:"mc",q:"Why might a HAWKISH-scored statement precede a CUT?",o:["Model useless","Surprises happen between meetings — language at time T cannot see T+1 shocks","Math error","Temperature too low"],a:1,x:"Knowing WHY misses happen is domain expertise — your edge over generic engineers."}),
+E({t:"fb",q:"Keep secrets out of git:",c:"# .gitignore\n.venv/\n_____",a:[".env"],x:".env in .gitignore — the line that prevents your worst week."}),
+E({t:"mc",q:"v1 ships Sep 13 Fed-only. ECB/BoE are…",o:["A failure","The hardening phase: extend AFTER shipping, refactoring into ingest(bank)","Impossible","Someone else&#39;s job"],a:1,x:"Ship narrow, then generalise. Your first refactor is scheduled, not accidental."})
+]}},
+
+/* ===== L6 ===== */
+{id:"L6",name:"SQL & Postgres",month:"NOV",tag:"SELECT · JOIN · GROUP BY",color:"#3DDC97",color2:"#1f7a52",phase:"PHASE 3 · PRODUCTION MUSCLE",desc:"Ask hard questions of data — fluently.",
+missions:[
+{id:"L6M1",icon:"🔍",title:"SELECT mastery",lesson:'<h3>LESSON · THE QUERY SENTENCE</h3><p>SQL reads like a sentence with fixed word order:</p><pre>SELECT bank, date, score\nFROM scores\nWHERE score > 0 AND date >= &#39;2025-01-01&#39;\nORDER BY score DESC\nLIMIT 5;</pre><p>Translation: <i>these columns, from this table, only matching rows, sorted, top 5.</i> <code>DESC</code> = descending. Text values use single quotes in SQL. This one shape answers a startling share of all data questions.</p>',
+ex:[
+E({t:"fb",q:"Most hawkish first:",c:"SELECT * FROM scores ORDER BY score _____;",a:["DESC","desc"],x:"DESC = high to low."}),
+E({t:"ty",q:"Type: all columns from decisions where bank equals 'fed' (single quotes).",a:["SELECT * FROM decisions WHERE bank = 'fed'","SELECT * FROM decisions WHERE bank = 'fed';","select * from decisions where bank = 'fed'"],x:"The sentence pattern, applied."}),
+E({t:"mc",q:"LIMIT 10 does what?",o:["Caps the table forever","Returns at most 10 rows from THIS query","Deletes the rest","Speeds up the DB"],a:1,x:"Polite querying — especially while exploring."}),
+E({t:"po",q:"scores: (fed,2.0) (ecb,-1.0) (fed,3.5) (boe,0.5). How many rows match WHERE score > 1? (number)",a:["2"],x:"2.0 and 3.5 pass."}),
+E({t:"bug",q:"Find the bug:",c:"SELECT bank date FROM scores;",a:0,x:"Missing comma: SELECT bank, date FROM scores;"}),
+E({t:"mc",q:"WHERE date >= '2025-01-01' works on text dates because…",o:["Magic","ISO YYYY-MM-DD sorts correctly even as text — which is why you store dates that way","SQL converts everything","It does not work"],a:1,x:"ISO-8601 everywhere — the date format that compares correctly."})
+]},
+{id:"L6M2",icon:"🔗",title:"JOIN & GROUP BY",lesson:'<h3>LESSON · COMBINING &amp; SUMMARISING</h3><p><b>JOIN</b> stitches tables on a shared key:</p><pre>SELECT d.date, d.bank, s.score\nFROM scores s\nJOIN documents d ON s.doc_id = d.id;</pre><p><b>GROUP BY</b> collapses rows into summaries with aggregates (COUNT, AVG, SUM, MIN, MAX):</p><pre>SELECT bank, AVG(score), COUNT(*)\nFROM scores\nGROUP BY bank;</pre><p>One row per bank: average and count. JOIN answers <i>connect the facts</i>; GROUP BY answers <i>summarise the facts</i>.</p>',
+ex:[
+E({t:"fb",q:"Connect scores to documents:",c:"SELECT d.date, s.score\nFROM scores s\nJOIN documents d _____ s.doc_id = d.id;",a:["ON","on"],x:"ON declares which rows belong together."}),
+E({t:"mc",q:"AVG(score) … GROUP BY bank returns…",o:["One overall average","One row PER BANK with its average","Every row with averages attached","Error"],a:1,x:"GROUP BY collapses each group to one summary row."}),
+E({t:"ty",q:"Type: count rows per bank in scores (SELECT bank, COUNT(*) … GROUP BY bank).",a:["SELECT bank, COUNT(*) FROM scores GROUP BY bank","SELECT bank, COUNT(*) FROM scores GROUP BY bank;","select bank, count(*) from scores group by bank"],x:"The census query — per-category counts."}),
+E({t:"mc",q:"Why were documents and scores separate tables back in L4?",o:["Habit","One document, MANY scores (models, prompt versions) — JOIN reunites them on demand","SQLite limits","Aesthetics"],a:1,x:"Normalised design pays off exactly here."}),
+E({t:"po",q:"scores: (fed,2) (fed,4) (ecb,-2). AVG for fed after GROUP BY bank? (number)",a:["3","3.0"],x:"(2+4)/2 = 3."}),
+E({t:"bug",q:"Find the bug:",c:"SELECT bank, AVG(score)\nFROM scores\nGROUP BY score;",a:2,x:"Group by the CATEGORY (bank), not the value you average."})
+]},
+{id:"L6M3",icon:"🐘",title:"Postgres, indexes & pgvector",lesson:'<h3>LESSON · GROWN-UP DATABASE</h3><p><b>Postgres</b> is SQLite&#39;s industrial sibling: a server, many users, your production home (free hosting: Neon). Same SQL, more muscle.</p><p><b>Indexes</b>: without one, <code>WHERE bank=&#39;fed&#39;</code> scans every row; with <code>CREATE INDEX idx_bank ON scores(bank)</code> it jumps straight there — a book index. Check plans with <code>EXPLAIN</code>.</p><p><b>pgvector</b> adds a vector column type and similarity search inside Postgres — the storage for embeddings, arriving in L8.</p>',
+ex:[
+E({t:"mc",q:"An index speeds queries by…",o:["Compressing data","Letting the DB jump to matching rows instead of scanning the table","Caching results","Deleting rows"],a:1,x:"Book-index analogy: look up fed on one page, not the whole book."}),
+E({t:"mc",q:"The cost of an index:",o:["Nothing","Slightly slower writes + storage — every insert updates the index too","Slower reads","Monthly fees"],a:1,x:"Index what you FILTER/JOIN on often. Not everything."}),
+E({t:"fb",q:"See the query plan:",c:"_____ SELECT * FROM scores WHERE bank = 'fed';",a:["EXPLAIN","explain"],x:"EXPLAIN reveals scan vs index — your first performance tool."}),
+E({t:"mc",q:"SQLite vs Postgres in one line:",o:["Different languages","SQLite = a file inside your app; Postgres = a server many apps share","Postgres is Microsoft-only","SQLite always faster"],a:1,x:"Prototype on SQLite, run production on Postgres — your November migration."}),
+E({t:"mc",q:"pgvector exists so you can…",o:["Draw charts in SQL","Store embeddings and run similarity search inside Postgres — no separate vector DB","Compress text","Speed joins"],a:1,x:"One database for rows AND vectors — simple, robust RAG storage."}),
+E({t:"pa",q:"Order the SQLite → Postgres migration:",lines:["create the Postgres database (Neon)","recreate the schema (CREATE TABLE …)","read all rows out of SQLite","insert rows into Postgres","point the app connection at Postgres"],x:"Schema, then data, then switch the wire. Script it — repeatable beats heroic."})
+]}
+],
+boss:{title:"The Query Boss",pass:75,ex:[
+E({t:"ty",q:"Type: average score per bank, rows since '2025-01-01', from scores.",a:["SELECT bank, AVG(score) FROM scores WHERE date >= '2025-01-01' GROUP BY bank","SELECT bank, AVG(score) FROM scores WHERE date >= '2025-01-01' GROUP BY bank;","select bank, avg(score) from scores where date >= '2025-01-01' group by bank"],x:"Filter THEN group: WHERE precedes GROUP BY."}),
+E({t:"mc",q:"Slow query on 500k rows: WHERE doc_id = 123. First move?",o:["Bigger laptop","EXPLAIN it; likely add an index on doc_id","Rewrite in Python","Delete rows"],a:1,x:"Measure, then index the filtered column."}),
+E({t:"po",q:"decisions: (fed,hike) (fed,hold) (ecb,cut). COUNT(*) WHERE bank='fed'? (number)",a:["2"],x:"Two fed rows."}),
+E({t:"fb",q:"Top 3 most dovish ever:",c:"SELECT * FROM scores ORDER BY score ASC _____ 3;",a:["LIMIT","limit"],x:"ASC puts most-negative first; LIMIT trims."}),
+E({t:"bug",q:"Find the bug:",c:"SELECT d.bank, s.score\nFROM scores s\nJOIN documents d\nWHERE s.score > 0;",a:2,x:"JOIN needs ON: JOIN documents d ON s.doc_id = d.id."}),
+E({t:"mc",q:"'Each score joined to the NEXT decision after its date' shows that JOINs…",o:["Only match equal keys","Can express rich conditions (inequalities, dates) — relational thinking is a superpower","Are always slow","Need pgvector"],a:1,x:"SQL carries real analytical logic — your back-test lives in it."})
+]}},
+
+/* ===== L7 ===== */
+{id:"L7",name:"Tests, Docker & CI",month:"DEC",tag:"pytest · containers · actions",color:"#3DDC97",color2:"#1f7a52",phase:"PHASE 3 · PRODUCTION MUSCLE",desc:"Code that proves itself and runs anywhere.",
+missions:[
+{id:"L7M1",icon:"🧪",title:"pytest — proof, not hope",lesson:'<h3>LESSON · TESTS</h3><p>A test is code that checks your code:</p><pre># dv01.py\ndef dv01(notional, bps=1):\n    return notional * bps * 0.0001\n\n# test_dv01.py\nfrom dv01 import dv01\ndef test_basic():\n    assert dv01(1000000) == 100.0\ndef test_zero():\n    assert dv01(0) == 0</pre><p>Run <code>pytest</code>: it finds files named <code>test_*.py</code>, runs functions named <code>test_*</code>, and <code>assert</code> decides pass/fail. The payoff comes in 3 months when you refactor and tests instantly show what broke. <b>Test the edges</b>: zero, empty, malformed — where bugs live.</p>',
+ex:[
+E({t:"fb",q:"The keyword that decides pass/fail:",c:"def test_add():\n    _____ add(2, 2) == 4",a:["assert"],x:"assert True passes silently; assert False fails loudly with details."}),
+E({t:"mc",q:"pytest discovers tests by…",o:["Reading the README","Naming convention: files test_*.py, functions test_*","Asking you","Magic"],a:1,x:"Follow the naming, get discovery free."}),
+E({t:"mc",q:"The DEEP reason to write tests:",o:["Looks professional","Change code fearlessly — instant detection of what broke","pytest is mandatory","Faster code"],a:1,x:"Tests convert hope into knowledge in 3 seconds — the P3 refactoring superpower."}),
+E({t:"ty",q:"Type the terminal command that runs your test suite.",a:["pytest"],x:"pytest — soon wired into CI on every push."}),
+E({t:"bug",q:"This test passes even when parse() is broken. Pick the rotten line:",c:'def test_parse():\n    result = parse("fed 2026-09-17")\n    print(result)',a:2,x:"It prints instead of asserting. No assert = a test that cannot fail."}),
+E({t:"mc",q:"Best FIRST tests for your date parser?",o:["A 1000-page stress test","Happy path + edge cases: weird whitespace, missing date, empty string","Test print()","Parsers need no tests"],a:1,x:"Happy path proves it works; edges prove it survives."})
+]},
+{id:"L7M2",icon:"📦",title:"Docker — runs anywhere",lesson:'<h3>LESSON · CONTAINERS</h3><p>&quot;Works on my machine&quot; dies here. A <b>Dockerfile</b> is a recipe for a complete environment; an <b>image</b> is the frozen result; a <b>container</b> is that image running:</p><pre>FROM python:3.12-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nCMD ["python", "main.py"]</pre><p>Build &amp; run: <code>docker build -t macrolens .</code> then <code>docker run macrolens</code>. The order trick: copying requirements and installing BEFORE copying code means dependency layers are cached — code edits rebuild in seconds. Config enters via env vars (<code>-e KEY=value</code>), never baked into the image.</p>',
+ex:[
+E({t:"mc",q:"Image vs container:",o:["Same thing","Image = frozen recipe result; container = a running instance of it","Container is the file","Images are Windows-only"],a:1,x:"Blueprint vs building. One image, many containers."}),
+E({t:"fb",q:"Start the recipe from a Python base:",c:"_____ python:3.12-slim",a:["FROM","from"],x:"FROM picks the base image."}),
+E({t:"pa",q:"Order the cache-friendly Dockerfile:",lines:["FROM python:3.12-slim","WORKDIR /app","COPY requirements.txt .","RUN pip install -r requirements.txt","COPY . .",'CMD ["python", "main.py"]'],x:"Dependencies before code: edit all day, never reinstall."}),
+E({t:"mc",q:"Why does the API key enter as an env var instead of baked into the image?",o:["Env vars are faster","Anyone with the image could extract a baked-in secret; env vars stay outside the artifact","Docker forbids files","Keys are too long"],a:1,x:"Images get shared and cached. Secrets ride alongside at runtime."}),
+E({t:"ty",q:"Type the command building an image tagged macrolens from the current folder (the dot matters).",a:["docker build -t macrolens ."],x:"docker build -t name . — the dot is the build context."}),
+E({t:"mc",q:"The honest benefit of Dockerising MacroLens:",o:["It becomes AI-powered","The EXACT same environment runs on laptop, Railway, any server — deploys stop being adventures","Free hosting","Docker writes tests"],a:1,x:"Reproducibility is the product."})
+]},
+{id:"L7M3",icon:"🔁",title:"CI — the robot gatekeeper",lesson:'<h3>LESSON · GITHUB ACTIONS</h3><p><b>CI</b> runs your tests automatically on every push. A workflow at <code>.github/workflows/test.yml</code>:</p><pre>name: tests\non: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with: {python-version: "3.12"}\n      - run: pip install -r requirements.txt\n      - run: pytest</pre><p>Push → fresh machine → install → test → green tick or red X on the commit. Your rule, self-enforced: <b>red CI blocks merge.</b> Secrets for CI live in repo Settings → Secrets, never in the YAML.</p>',
+ex:[
+E({t:"fb",q:"Trigger on every push:",c:"name: tests\n_____: push",a:["on"],x:"on: declares the trigger — push, pull_request, schedule…"}),
+E({t:"mc",q:"CI&#39;s core promise:",o:["Free computers","EVERY push gets tested in a clean environment — broken code caught in minutes, publicly","It writes code","Faster pushes"],a:1,x:"You + tests + CI = a one-person team with a quality department."}),
+E({t:"mc",q:"Tests pass locally, fail in CI. Usual conclusion:",o:["CI is buggy","The clean machine exposed a hidden dependency on your laptop. CI is RIGHT — fix requirements","Delete the workflow","Push until green"],a:1,x:"CI failures are gifts: they show what your laptop quietly provided."}),
+E({t:"pa",q:"Order the workflow steps:",lines:["- uses: actions/checkout@v4","- uses: actions/setup-python@v5","- run: pip install -r requirements.txt","- run: pytest"],x:"Get code → get Python → get deps → prove it works. Every push, forever."}),
+E({t:"mc",q:"Where does ANTHROPIC_API_KEY live for CI runs?",o:["In the YAML","Repo Settings → Secrets, referenced as an env var","In the README","In a comment"],a:1,x:"Workflows are public code; the secrets store is encrypted and masked."}),
+E({t:"mc",q:"In L9 your EVAL suite joins pytest in CI. That means…",o:["Slower pushes only","A prompt change that degrades accuracy fails the build BEFORE shipping","Evals replace tests","Nothing changes"],a:1,x:"The eval gate: code regressions AND quality regressions blocked at the door."})
+]}
+],
+boss:{title:"The Infrastructure Boss",pass:75,ex:[
+E({t:"pa",q:"Order the professional change workflow:",lines:["create a branch","write the code change","write/adjust the test","push — CI runs","CI green → merge to main"],x:"Branch → code → test → robot check → merge. Hundreds of reps coming."}),
+E({t:"po",q:"add(a,b) returns a+b. Does this test pass or fail? (type pass or fail)",c:"def test_add():\n    assert add(2, 3) == 6",a:["fail"],x:"2+3=5≠6 — the TEST is wrong. Tests are code; they have bugs too."}),
+E({t:"fb",q:"The Dockerfile line declaring the start command:",c:'_____ ["python", "main.py"]',a:["CMD","cmd"],x:"CMD = what runs when the container starts."}),
+E({t:"mc",q:"requirements.txt exists so that…",o:["GitHub looks fuller","Any machine (CI, Docker, a colleague) installs YOUR exact dependencies with one pip command","Python requires it","Faster imports"],a:1,x:"Reproducible environments: pip freeze > requirements.txt."}),
+E({t:"mc",q:"A red X appears on your push. The professional reflex:",o:["Force-merge","Open CI logs, read the failing output, reproduce locally, fix","Delete the test","Wait for green"],a:1,x:"Logs → reproduce → fix. Stuck Protocol, new arena."}),
+E({t:"ty",q:"Type the path where GitHub Actions workflows live, for a file named test.yml",a:[".github/workflows/test.yml"],x:".github/workflows/test.yml — exact path; GitHub only looks there."})
+]}},
+
+/* ===== L8 ===== */
+{id:"L8",name:"RAG I — Embeddings",month:"JAN",tag:"vectors · chunking · retrieval",color:"#3DDC97",color2:"#1f7a52",phase:"PHASE 3 · PRODUCTION MUSCLE",desc:"Teach machines what similar meaning means.",
+missions:[
+{id:"L8M1",icon:"🧭",title:"What embeddings are",lesson:'<h3>LESSON · MEANING AS NUMBERS</h3><p>An <b>embedding</b> turns text into a vector (~1000 numbers) where <b>similar meaning → nearby vectors</b>. &quot;rate hike&quot; and &quot;tightening policy&quot; share no words but land close; &quot;rate hike&quot; and &quot;birthday cake&quot; land far apart.</p><p>Similarity = <b>cosine similarity</b>: 1 ≈ same meaning, 0 ≈ unrelated. This unlocks <b>semantic search</b>: embed the question, embed the documents, return the nearest — matching meaning, not keywords. Embeddings come from an embedding-model API (text in, vector out) and are <b>cheap</b> vs LLM calls — embed once, search forever.</p>',
+ex:[
+E({t:"mc",q:"An embedding is…",o:["A compressed ZIP","A vector of numbers positioning the MEANING of text in space","A translation","Encryption"],a:1,x:"Geometry of meaning: nearby ≈ similar. All of RAG builds on this."}),
+E({t:"mc",q:"Cosine similarity 0.92 between two texts means…",o:["92% same words","Very similar meaning","92 shared characters","Error"],a:1,x:"High cosine = close in meaning-space, regardless of vocabulary."}),
+E({t:"mc",q:"Keyword search fails but embeddings succeed when…",o:["Documents are short","The answer uses DIFFERENT WORDS than the question","Documents are English","Database is small"],a:1,x:"Semantic beats lexical — the core reason RAG works."}),
+E({t:"po",q:"Similarities — A: 0.91, B: 0.34, C: 0.78. Top-2 retrieved, in order? (like A,C)",a:["A,C","a,c","A, C"],x:"Sort by similarity, take k. Top-k retrieval, by hand."}),
+E({t:"mc",q:"Why store embeddings (pgvector) instead of recomputing per search?",o:["Vectors expire","Embed each chunk ONCE, reuse forever — recomputing thousands per query is slow and costly","Postgres requires it","Accuracy improves"],a:1,x:"Write-once, read-forever. Only the query gets embedded per search."}),
+E({t:"mc",q:"RAG in one sentence:",o:["Fine-tuning on your data","Retrieve the most relevant chunks, paste them into the prompt, answer FROM them","A vector DB brand","Caching"],a:1,x:"Retrieval-Augmented Generation: ground the model in YOUR documents."})
+]},
+{id:"L8M2",icon:"✂️",title:"Chunking",lesson:'<h3>LESSON · CUTTING DOCUMENTS</h3><p>A 10-K is 200 pages; one vector cannot represent 50 topics, and retrieval should return <i>passages</i>, not books. So you <b>chunk</b>:</p><p><b>Naive</b>: fixed size (~500–1000 chars) with <b>overlap</b> (~10–15%) so sentences cut at a boundary survive in the next chunk. <b>Section-aware</b>: split on real structure — Risk Factors, MD&amp;A. Each chunk carries <b>metadata</b> (doc, section, date) — without it, no citations, no filters, no debugging.</p><p>The rule: chunking is a <b>measurable choice</b>. Build naive, test section-aware against it on real questions, keep the winner. Never argue strategy without numbers.</p>',
+ex:[
+E({t:"mc",q:"Why chunk at all?",o:["Size limits","One vector cannot represent a 200-page document; retrieval should return precise passages","LLMs cannot read long text","Tradition"],a:1,x:"Chunks = retrievable, citable units of meaning."}),
+E({t:"mc",q:"Overlap exists to…",o:["Increase storage bills","Keep sentences split at a boundary intact in at least one chunk","Confuse the model","Equalise sizes"],a:1,x:"No overlap → straddling ideas vanish from retrieval. 10–15% is the insurance."}),
+E({t:"mc",q:"Metadata on every chunk enables…",o:["Smaller vectors","Citations, filters (only 2025 10-Ks), and debugging which source answered","Faster embedding","Nothing"],a:1,x:"FilingsBrain&#39;s mandatory citations ARE chunk metadata surfaced."}),
+E({t:"po",q:"3000-char doc, 1000-char chunks, no overlap. How many chunks? (number)",a:["3"],x:"3000/1000 = 3."}),
+E({t:"mc",q:"Section-aware beats naive chunking WHEN…",o:["Always, by definition","Your eval shows it on real questions — keep the winner","Never","The font is serif"],a:1,x:"Strategies are hypotheses; evals are verdicts."}),
+E({t:"pa",q:"Order the FilingsBrain ingestion pipeline:",lines:["download 10-K from EDGAR","parse to clean text sections","chunk with overlap + attach metadata","embed each chunk","insert chunk + vector into pgvector"],x:"Fetch → clean → cut → vectorise → store. MacroLens ingestion, evolved."})
+]},
+{id:"L8M3",icon:"🎯",title:"Retrieval & measuring it",lesson:'<h3>LESSON · TOP-K AND HIT RATE</h3><p>Query time: embed the question → similarity-search → take <b>top-k</b> chunks (start k=5) → into the prompt → answer <b>with citations</b>. In pgvector it is almost familiar SQL:</p><pre>SELECT content, metadata\nFROM chunks\nORDER BY embedding &lt;=&gt; query_embedding\nLIMIT 5;</pre><p>Trade-off: tiny k may miss the answer; huge k buries it in noise and burns tokens. So <b>measure</b>: write questions where you KNOW which chunk holds the answer, compute <b>retrieval hit rate</b> — how often the right chunk appears in top-k. Diagnose by stage: retrieval missing → fix chunking/k/embeddings; retrieval fine but answer wrong → fix generation (L9).</p>',
+ex:[
+E({t:"mc",q:"Top-k retrieval means…",o:["The k newest chunks","The k most SIMILAR chunks to the query embedding","k random chunks","The k longest"],a:1,x:"Nearest-by-meaning, k of them, into the prompt."}),
+E({t:"mc",q:"k=50 vs k=5:",o:["Strictly better","Noise buries signal, costs jump, answers often get WORSE — tune k by measurement","pgvector caps at 10","Latency improves"],a:1,x:"More context ≠ better answers. Another dial for the eval to set."}),
+E({t:"fb",q:"Nearest chunks first:",c:"SELECT content FROM chunks\nORDER BY embedding <=> query_embedding\n_____ 5;",a:["LIMIT","limit"],x:"Your L6 SQL + one distance operator = semantic search."}),
+E({t:"mc",q:"Retrieval hit rate measures…",o:["Eloquence","How often the chunk that ACTUALLY contains the answer appears in top-k","Tokens/sec","Clicks"],a:1,x:"Isolates the retrieval stage. If the right chunk never arrives, no prompt can save the answer."}),
+E({t:"mc",q:"Answers wrong; hit rate 95%. Where is the bug?",o:["Embeddings","Chunking","GENERATION — the model misuses good context; fix the prompt/answer rules","pgvector"],a:2,x:"Stage-by-stage diagnosis: retrieval delivered; generation fumbled."}),
+E({t:"po",q:"10 test questions; right chunk in top-5 for 8. Hit rate? (like 80%)",a:["80%","80"],x:"8/10 = 80%. The 2 misses: chunking or embedding problems? THAT investigation is the job."})
+]}
+],
+boss:{title:"The Retrieval Boss",pass:75,ex:[
+E({t:"pa",q:"Order a full RAG question-answer flow:",lines:["embed the user question","similarity-search pgvector for top-k chunks","build the prompt with chunks + citation rules","call the LLM","return answer with citations"],x:"Embed → retrieve → assemble → generate → cite. Whiteboard-ready."}),
+E({t:"mc",q:"User asks about liquidity coverage; the 10-K says LCR requirements. What finds it?",o:["Keyword search","Embedding similarity — abbreviation and phrase live close in meaning-space","Alphabetical index","Nothing"],a:1,x:"Semantic retrieval shines where vocabulary diverges — constant in finance docs."}),
+E({t:"po",q:"800-char chunks, 80-char overlap: each new chunk advances how many chars? (number)",a:["720"],x:"Stride = size − overlap = 720. Week-24 mechanics."}),
+E({t:"mc",q:"Where do FilingsBrain citations come from?",o:["Model memory","Chunk METADATA returned by retrieval, surfaced in the answer","A citations API","Manual edits"],a:1,x:"Carry metadata end-to-end. No metadata, no trustworthy citations."}),
+E({t:"mc",q:"Question: JPM 2024 net interest income. Your system should…",o:["Answer from model memory","Retrieve from the 2024 10-K, answer ONLY from retrieved text with citation — refuse if absent","Search Google live","Average guesses"],a:1,x:"Grounded-or-refuse: what separates RAG systems from confident hallucination machines."}),
+E({t:"mc",q:"Embeddings cost ≪ generation. Architectural consequence:",o:["Skip embeddings","Embed generously up front (cheap, one-off); spend optimisation effort on LLM calls","Generate generously","Costs are irrelevant"],a:1,x:"Know where the money goes: ingestion is pennies; per-query generation is the bill."})
+]}},
+
+/* ===== L9 ===== */
+{id:"L9",name:"RAG II — Evals",month:"FEB",tag:"golden sets · judges · gates",color:"#3DDC97",color2:"#1f7a52",phase:"PHASE 3 · PRODUCTION MUSCLE",desc:"Your signature skill: proving AI quality, automatically.",
+missions:[
+{id:"L9M1",icon:"🏆",title:"Golden sets",lesson:'<h3>LESSON · THE ANSWER KEY</h3><p>A <b>golden set</b> is a hand-built exam: ~50 question → ideal-answer pairs, plus which source contains each answer. Yours is special because <b>you write desk-realistic questions</b> — what a Markets analyst actually asks of a 10-K.</p><p>Design for <b>coverage</b>: easy lookups, multi-section synthesis, AND <b>questions whose answer is NOT in the documents</b> — where the correct response is a refusal. Golden sets live in the repo as versioned files and grow every time a user finds a failure: bug → new test case → never regress again.</p>',
+ex:[
+E({t:"mc",q:"A golden set is…",o:["Model weights","Curated questions + ideal answers used to score quality automatically","Gold-tier API access","Premium training data"],a:1,x:"Your exam paper. Every change gets graded against it."}),
+E({t:"mc",q:"Why include questions with NO answer in the corpus?",o:["Padding","To verify the system REFUSES instead of hallucinating","To trick users","You should not"],a:1,x:"A system never tested on absence will confidently invent. Test the refusal."}),
+E({t:"mc",q:"Your unfair advantage in golden-set design:",o:["Typing speed","Domain judgment — you know what a Markets desk asks and what GOOD looks like","Money","GPUs"],a:1,x:"Eval quality is capped by question quality. Your context is the moat."}),
+E({t:"mc",q:"A user catches a wrong answer in production. Eval-driven reflex:",o:["Apologise, move on","Add the exact case to the golden set, fix it — now it can never silently regress","Lower the bar","Blame retrieval"],a:1,x:"Bugs become permanent test cases. The system ratchets upward."}),
+E({t:"fb",q:"A golden entry needs question, ideal, and…",c:'{"q": "JPM 2024 NII?",\n "ideal": "$92.3bn",\n "_____": "JPM 10-K 2024, MD&A"}',a:["source",'"source"'],x:"Source lets you score CITATIONS and debug retrieval separately."}),
+E({t:"mc",q:"50 hand-written pairs vs 5000 auto-generated:",o:["5000 wins","50 careful, realistic, coverage-designed pairs beat 5000 noisy ones","Evals need 1M+","Generate everything"],a:1,x:"A small sharp exam beats a giant sloppy one. Curate like the expert you are."})
+]},
+{id:"L9M2",icon:"⚖️",title:"LLM-as-judge & faithfulness",lesson:'<h3>LESSON · GRADING AT SCALE</h3><p>Exact match cannot grade prose. Solution: a second LLM call <b>judges</b> the answer against the ideal, with a written <b>rubric</b>:</p><pre>Given QUESTION, IDEAL, and ANSWER, score:\n- correctness 0-5 (matches ideal)\n- faithfulness 0-5 (claims supported by\n  the provided source chunks ONLY)\n- citations valid? yes/no\nReturn JSON only.</pre><p><b>Faithfulness</b> is the anti-hallucination metric: every claim grounded in retrieved text? Judges have quirks (leniency, length bias), so <b>calibrate</b> once: hand-grade ~20 answers, compare with the judge, tune the rubric until agreement is high. Then it grades 50 questions in minutes, forever.</p>',
+ex:[
+E({t:"mc",q:"LLM-as-judge means…",o:["The model judges users","A separate LLM call scores answers against ideals using a rubric","A courtroom dataset","Self-scoring"],a:1,x:"Turns looks-right-to-me into numbers, at scale, on every change."}),
+E({t:"mc",q:"Faithfulness specifically measures…",o:["Politeness","Whether every claim is SUPPORTED BY THE RETRIEVED SOURCES — not invented","Speed","Citation formatting"],a:1,x:"True-in-the-world but unsupported-by-sources still fails a grounded system."}),
+E({t:"mc",q:"Why calibrate the judge against ~20 hand grades?",o:["Tradition","Judges drift lenient/length-biased; calibration proves the judge agrees with the expert before you trust it","To train it","No reason"],a:1,x:"Measure your measuring instrument. Skipping this is how teams trust broken evals."}),
+E({t:"po",q:"Judge faithfulness scores: 5,5,4,2,5. Average? (one decimal, like 4.2)",a:["4.2"],x:"21/5 = 4.2 — and the 2 is the interesting datapoint."}),
+E({t:"mc",q:"Answer cites 10-K p.45, but retrieval never returned p.45. The judge should…",o:["Pass — the number is right","Flag invalid citation: the system cited a source it never saw — serious grounding failure","Ignore citations","Add p.45 itself"],a:1,x:"Fabricated citations manufacture false trust. Test for them explicitly."}),
+E({t:"fb",q:"Constrain the judge output:",c:'Compare ANSWER to IDEAL.\nReturn _____ only:\n{"correctness": 0-5, "faithfulness": 0-5}',a:["JSON","json"],x:"Judge output must parse to aggregate — L5 discipline, reused."})
+]},
+{id:"L9M3",icon:"🚦",title:"The eval gate",lesson:'<h3>LESSON · QUALITY IN CI</h3><p>The capstone move: evals run <b>in CI</b>, beside pytest. Push → tests run → <b>eval suite runs the golden set</b> → scores vs thresholds (e.g. correctness ≥ 4.0, faithfulness ≥ 4.5, refusal accuracy ≥ 90%) → <b>below threshold = red build = no merge.</b></p><p>This catches the failure that haunts AI teams: a prompt tweak that helps one case and silently wrecks five others. Eval runs cost cents per push (use a cheap judge model — worth it), and thresholds are <b>ratchets</b>: as the system improves, raise them. Almost nobody does this properly. You will, in public, with receipts.</p>',
+ex:[
+E({t:"mc",q:"An eval gate is…",o:["A paywall","CI failing the build when golden-set scores drop below thresholds","A login screen","Rate limiting"],a:1,x:"pytest guards code; the eval gate guards AI quality. Both robots, every push."}),
+E({t:"mc",q:"The disaster it prevents:",o:["Downtime","A prompt improvement that silently degrades other cases shipping unnoticed","Slow queries","Expensive logs"],a:1,x:"LLM changes have invisible blast radius. The golden set makes it visible per push."}),
+E({t:"mc",q:"Evals-in-CI cost ~$0.20/push. Senior take:",o:["Disable Fridays","Trivial vs a shipped regression; cheap judge model, pay happily","Run yearly","Hand-grade everything"],a:1,x:"$0.20 vs a user-facing quality incident is arithmetic, not a decision."}),
+E({t:"pa",q:"Order the gated pipeline:",lines:["push to GitHub","pytest runs","eval suite runs the golden set","scores compared to thresholds","green → mergeable; red → blocked"],x:"Code gate, then quality gate. This diagram in an interview = instant credibility."}),
+E({t:"mc",q:"Faithfulness improved 4.5 → 4.7 avg. The ratchet move:",o:["Change nothing","Raise the threshold toward 4.6 so the system cannot slide back","Lower it for headroom","Delete passing tests"],a:1,x:"Ratchets lock in progress. Floors rise as you improve."}),
+E({t:"mc",q:"This whole level compresses, in an interview, to:",o:["I prompt really well","I build golden sets and wire eval gates into CI so AI quality regressions cannot ship","I have great vibes about outputs","I use AI daily"],a:1,x:"That sentence + your public repos = the rare candidate. Also simply true."})
+]}
+],
+boss:{title:"The Quality Boss",pass:75,ex:[
+E({t:"pa",q:"Order: building the eval system from zero:",lines:["write 50 golden Q/A pairs with sources","write the judge rubric prompt","calibrate judge vs 20 hand grades","script: run set → judge → aggregate scores","wire into CI with thresholds"],x:"Exam → grader → trust the grader → automate → enforce."}),
+E({t:"mc",q:"Correctness 4.8, faithfulness 3.1. Diagnosis?",o:["All good","Right answers, weakly grounded: leaning on memory; tighten answer-only-from-sources + check retrieval","Faithfulness optional","Citations self-heal"],a:1,x:"The metric SPLIT is the diagnosis. Blended scores hide exactly this."}),
+E({t:"po",q:"10 not-in-corpus questions; refused 7, invented 3. Refusal accuracy? (like 70%)",a:["70%","70"],x:"7/10. The 3 hallucinations are your top-priority bugs — and new golden cases."}),
+E({t:"mc",q:"Chunking change: hit rate 78→85%, faithfulness 4.4→4.5, cost +5%. Ship?",o:["No — cost rose","Yes — meaningful quality gains for marginal cost; document the trade in the PR","Coin flip","Wait for perfection"],a:1,x:"Eval-driven decisions: numbers in, judgment applied, trade-offs documented."}),
+E({t:"mc",q:"Why can the judge use a CHEAP model while generation uses a stronger one?",o:["Judges deserve less","Grading against rubric+ideal is easier than open generation; save money where the task allows","Must match","Cheap = stricter"],a:1,x:"Fit model strength to task difficulty — cost engineering, previewing L11."}),
+E({t:"mc",q:"Golden sets, judges, gates exist because…",o:["LLMs never fail","LLM failures are silent and non-obvious — without measurement you cannot know if a change helped","LLMs are deterministic","Users report everything"],a:1,x:"You cannot manage what you do not measure — doubly true when the system sounds confident while wrong."})
+]}},
+
+/* ===== L10 ===== */
+{id:"L10",name:"Agents",month:"MAR",tag:"tool use · patterns · guardrails",color:"#C77DFF",color2:"#6a3f8f",phase:"PHASE 4 · SPECIALISATION",desc:"Models that act — safely, measurably, only when worth it.",
+missions:[
+{id:"L10M1",icon:"🛠️",title:"Tool use",lesson:'<h3>LESSON · GIVING MODELS HANDS</h3><p><b>Tool use</b>: you describe functions to the model (name, purpose, parameter schema); when a question needs one, the model responds with a <b>tool call request</b> — run query_scores with bank=fed — <b>your code executes it</b>, returns the result, and the model continues with real data.</p><p>The loop: user asks → model requests tool → your code runs it → result back → model answers (or requests another tool). Two truths: <b>(1)</b> the model never executes anything — your code is the hands, which is exactly where safety lives; <b>(2)</b> tool descriptions are prompts — vague descriptions produce wrong calls. Write them like great docstrings.</p>',
+ex:[
+E({t:"mc",q:"Who actually executes the function in tool use?",o:["The model, remotely","YOUR code — the model only REQUESTS a call with arguments","Anthropic servers run your code","The database"],a:1,x:"Model proposes, your code disposes. All safety boundaries live on your side."}),
+E({t:"mc",q:"A tool definition includes…",o:["The source code","Name, description, parameter schema — enough to know WHEN and HOW to call it","Your API key","Test cases"],a:1,x:"An interface description that doubles as a prompt: clarity in, correct calls out."}),
+E({t:"pa",q:"Order one tool-use round trip:",lines:['user asks: average Fed score in 2025?','model responds with tool call: query_scores(bank="fed", year=2025)',"your code runs the SQL and returns rows","model reads the result and writes the answer"],x:"Ask → request → execute → answer. Multi-step tasks chain this loop."}),
+E({t:"mc",q:'Model calls your tool with year="twenty25". Your code should…',o:["Crash","VALIDATE arguments and return a clear error — the model reads it and retries correctly","Guess 2025 silently","Execute anyway"],a:1,x:"Treat model calls like user input. Good error messages make the loop self-correcting."}),
+E({t:"mc",q:"Best tool description?",o:["does stuff with data","query_scores: returns hawk-dove scores. Params: bank (fed|ecb|boe), year (int). Use for historical score questions.","SQL wrapper v2","DO NOT USE"],a:1,x:"Purpose + parameters + when-to-use. Models pick tools by reading these."}),
+E({t:"mc",q:"execute_sql(any_string) vs three specific safe tools:",o:["Same risk","Specific tools = a capability boundary; arbitrary SQL could DROP TABLE on a confused day","Arbitrary is best practice","SQL is always safe"],a:1,x:"Capability design IS safety design. Expose verbs that are safe under ANY arguments."})
+]},
+{id:"L10M2",icon:"🧠",title:"Patterns — and when NOT to agent",lesson:'<h3>LESSON · WORKFLOWS BEFORE AGENTS</h3><p>From Anthropic&#39;s <i>Building Effective Agents</i>: most wins come from <b>simple composable workflows</b>, not autonomous loops.</p><p><b>Routing</b> — classify the input, dispatch to the right path (Fed question → MacroLens; filing question → FilingsBrain). <b>Orchestrator–workers</b> — one call plans and splits; parallel workers handle pieces (compare risk across 5 banks → 5 workers); merge results. <b>Evaluator–optimizer</b> — generator drafts, a critic checks against criteria, generator revises; loop until pass or max rounds.</p><p>Discipline: <b>a fixed pipeline you can test beats an autonomous agent you cannot.</b> Reach for open-ended agents only when the path genuinely cannot be predetermined.</p>',
+ex:[
+E({t:"mc",q:"Routing is…",o:["Network config","Classify the request → dispatch to the right specialised pipeline","Load balancing","Random assignment"],a:1,x:"A classifier in front of specialists: cheaper, testable, debuggable."}),
+E({t:"mc",q:"Compare credit-risk language across five 10-Ks — which pattern?",o:["One giant prompt with all five","Orchestrator–workers: plan, one worker per filing, merge","Evaluator only","Coin flip"],a:1,x:"Decomposable + parallel = orchestrator-workers. Each worker testable alone."}),
+E({t:"mc",q:"Evaluator–optimizer is…",o:["Two GPUs","Generate → critique against explicit criteria → revise → repeat until pass or max-rounds","A/B testing","Fine-tuning"],a:1,x:"Inline quality control — your L9 rubric skills at generation time."}),
+E({t:"mc",q:"Why prefer fixed workflows when possible?",o:["Agents are illegal","Predictable, testable, bounded-cost; autonomy adds failure modes and only pays when the path truly cannot be pre-scripted","Workflows are smarter","Agents are always slow"],a:1,x:"Choose the LEAST autonomy that solves the problem — the senior answer."}),
+E({t:"mc",q:"The evaluator keeps failing the draft; round 6 begins. Design should…",o:["Loop forever — quality!","Cap rounds (e.g. 3): return best-so-far flagged, or escalate to a human","Delete the evaluator","Raise temperature each round"],a:1,x:"Unbounded loops = unbounded bills. Termination is part of the pattern."}),
+E({t:"pa",q:"Order the evaluator–optimizer flow:",lines:["generator drafts the research note","evaluator scores it against the rubric","below threshold → feedback to generator","generator revises","pass or max-rounds → return result"],x:"Draft → judge → feedback → revise → exit. Self-correction with a leash."})
+]},
+{id:"L10M3",icon:"🛡️",title:"Guardrails",lesson:'<h3>LESSON · LEASHES FOR LOOPS</h3><p>An agent is a loop that spends money and takes actions — so it ships with leashes:</p><p><b>Max steps</b> (a confused agent retrying forever is a billing incident). <b>Validation</b> on every tool argument. <b>Idempotency &amp; reversibility</b>: reads retry safely; writes/sends need exactly-once care and undo paths. <b>Human-in-the-loop</b> for consequential actions — the agent drafts, a human approves anything that emails a client or writes to production. <b>Observability</b>: log every step (tool, args, result, tokens) so any run can be replayed and audited.</p><p>Your governance instinct as code: <i>what is the worst this loop could do, and what makes that impossible?</i></p>',
+ex:[
+E({t:"mc",q:"Max-step caps exist because…",o:["Models get tired","A stuck agent loops indefinitely — burning money, possibly repeating actions; bound it and flag for review","APIs require them","Steps are taxed"],a:1,x:"Every loop gets a leash. It-ran-all-weekend should be impossible by construction."}),
+E({t:"mc",q:"Which tool call deserves human approval first?",o:["read_scores(bank)","search_chunks(query)","send_email(to=client, body=draft)","get_current_date()"],a:2,x:"Reads are reversible; SENDS are not. Consequence level sets the approval bar."}),
+E({t:"mc",q:"Idempotent means…",o:["Very fast","Running twice has the same effect as once — safe to retry after failures","Encrypted","Free"],a:1,x:"Design writes so retries do not duplicate. Networks fail; pipelines should not double-post."}),
+E({t:"mc",q:"Step-by-step agent logging buys you…",o:["Bigger disks","Replayable, auditable, debuggable runs — why-did-it-do-that has an answer","Faster inference","Nothing"],a:1,x:"Observability turns mystery into transcript — exactly what model-risk reviewers ask for, too."}),
+E({t:"mc",q:"An agent touching Postgres should connect as…",o:["Superuser, for flexibility","A least-privilege role: read where needed, write only where designed, DROP never","Admin","No permissions"],a:1,x:"Blast-radius thinking: a confused agent cannot destroy what its role cannot touch."}),
+E({t:"mc",q:"Your failure-mode catalogue relates to guardrails how?",o:["It does not","Each catalogued failure maps to a guardrail that prevents or catches it — the catalogue is the guardrail spec","For auditors only","Guardrails replace it"],a:1,x:"Failure observed → control designed. Governance-as-engineering — your rare triple in action."})
+]}
+],
+boss:{title:"The Agent Boss",pass:75,ex:[
+E({t:"pa",q:"Design analyse-this-filing-and-draft-a-note as a guarded workflow:",lines:["route: confirm this is a filing-analysis request","orchestrator plans the sections","workers retrieve + analyse per section (RAG)","evaluator checks draft for faithfulness + citations","human approves before anything is sent"],x:"Routing + orchestration + eval gate + human-in-loop — every pattern, composed."}),
+E({t:"mc",q:'Agent calls query_scores(bank="federal reserve") but your enum is fed|ecb|boe. Best response:',o:["500, no message","Return: invalid bank — use fed, ecb, or boe. The model self-corrects next step","Silently map it","Crash the loop"],a:1,x:"Informative errors make tool loops self-healing."}),
+E({t:"mc",q:"When is a fully autonomous agent the right call?",o:["Always — it is 2026","When steps genuinely cannot be predetermined — and even then with caps, logs, and least privilege","Never","Only chatbots"],a:1,x:"The senior answer has a when AND a with."}),
+E({t:"mc",q:"Per-step token logging lets you discover…",o:["User locations","That one worker burns 80% of cost — your optimisation target","Release dates","Nothing"],a:1,x:"Measure → find the hotspot → optimise THAT."}),
+E({t:"mc",q:"Orchestrator fans out to 12 parallel workers. First risk to cap:",o:["Too much intelligence","Cost/latency fan-out — 12x calls per request; bound worker count, reuse results","Worker unions","Postgres jealousy"],a:1,x:"Fan-out multiplies bills. Architecture decisions ARE cost decisions."}),
+E({t:"mc",q:"One sentence that proves you get agents:",o:["Agents are AGI","I give models narrow validated tools, compose tested workflows, cap loops, log every step, and keep humans on consequential actions","I let it run on vibes","Agents replace engineers"],a:1,x:"The interview answer — every clause is something you have now built or designed."})
+]}},
+
+/* ===== L11 ===== */
+{id:"L11",name:"Production & Cost",month:"APR",tag:"secrets · monitoring · caching",color:"#C77DFF",color2:"#6a3f8f",phase:"PHASE 4 · SPECIALISATION",desc:"Systems that survive contact with reality — affordably.",
+missions:[
+{id:"L11M1",icon:"🔐",title:"Secrets & logging",lesson:'<h3>LESSON · OPERATIONAL HYGIENE</h3><p><b>Secrets</b>: keys in env vars (.env + gitignore locally; platform secret stores on Railway/GitHub). If a key EVER touches a commit — even deleted next commit — it is burned: <b>rotate immediately</b>; git history is forever.</p><p><b>Logging</b>: print() dies in production. Use the logging module with levels (DEBUG/INFO/WARNING/ERROR) and <b>structured</b> entries — one parseable line per event with doc_id, model, tokens, latency, outcome — so logs become queryable data. <b>Error tracking</b> (Sentry free tier) captures crashes with context and alerts you. The standard: <b>users should never be the ones who tell you it is broken.</b></p>',
+ex:[
+E({t:"mc",q:"A key was committed, then deleted next commit. Status?",o:["Safe — deleted","BURNED: history retains it; bots harvest histories. Rotate now","Safe if the repo is private","GitHub encrypts it"],a:1,x:"History is immutable and crawled. New key, within minutes."}),
+E({t:"mc",q:"Structured logging means…",o:["Pretty colours","Machine-parseable entries with context — filterable, countable, analysable like data","Longer messages","Logging to Word"],a:1,x:"event=score_done doc=fed_2026_03 tokens=1380 ms=2100 ok=true — grep-able, graph-able."}),
+E({t:"mc",q:"Log levels exist so that…",o:["Logs look enterprise","Production runs quiet at INFO+; debugging flips to DEBUG — no code changes","ERROR is decorative","You pick a favourite"],a:1,x:"Volume control for telemetry, set by environment variable."}),
+E({t:"mc",q:"Sentry-style error tracking adds over plain logs:",o:["Nothing","Automatic crash capture with stack trace + context, grouped, with ALERTS","A nicer font","Slower errors"],a:1,x:"Logs are for looking; alerting is for being told — it kills silent-cron-death."}),
+E({t:"bug",q:"Spot the operational sin:",c:'logging.info(f"call ok, key={api_key[:12]}")\nresult = score(doc)\nlogging.info("scored %s", doc.id)',a:0,x:"Never log secrets, even partially. Logs flow into tools, screenshots, tickets. Redact by reflex."}),
+E({t:"mc",q:"Your weekly ingestion cron should END by…",o:["Silence is golden","Emitting a structured summary (docs added, failures, cost) and ALERTING on zero docs or errors","Emailing the database","Restarting the server"],a:1,x:"Heartbeats + anomaly alerts. Broken-for-six-weeks becomes impossible."})
+]},
+{id:"L11M2",icon:"💸",title:"Caching & batch — the cost levers",lesson:'<h3>LESSON · ENGINEERING THE BILL</h3><p>Two platform levers cut LLM costs dramatically — measured before/after, always.</p><p><b>Prompt caching</b>: when calls share a large identical prefix (system prompt + rubric + examples), the platform caches that prefix; subsequent calls re-read it at a steep discount. Design for it: <b>stable content first, variable content (the document) last.</b></p><p><b>Batch processing</b>: jobs that can wait (re-scoring 300 statements overnight) go through the batch API at roughly half price. Interactive = real-time API; bulk = batch. Also in the toolbox: <b>model right-sizing</b> — route easy tasks to a cheaper tier when your evals prove quality holds.</p>',
+ex:[
+E({t:"mc",q:"Prompt caching saves money when…",o:["Every call is unique","Calls share a large identical PREFIX — cached and re-read at a discount","Outputs are short","You whisper"],a:1,x:"Stable-first prompt design makes the discount automatic."}),
+E({t:"mc",q:"To exploit caching, your scoring prompt should put…",o:["The document first","Stable instructions + rubric FIRST, the variable document LAST","Everything alphabetical","The key first"],a:1,x:"Identical prefixes cache; variable suffixes do not. Order is architecture."}),
+E({t:"mc",q:"Re-scoring 300 archived statements with prompt v3 tonight — which lane?",o:["Real-time, one by one","Batch API: it can wait, and costs about half","Skip rescoring","Manual"],a:1,x:"Interactive = real-time; bulk-and-patient = batch. Lane choice is a cost decision."}),
+E({t:"po",q:"Re-scoring run: $14 real-time. Batch at 50% off ≈ how many dollars? (number)",a:["7","$7"],x:"$7. Multiply across a year of experiments — receipts that matter."}),
+E({t:"mc",q:"Model right-sizing means…",o:["Bigger always","Routing easy tasks to a cheaper tier WHEN EVALS PROVE quality holds","Smallest always","Random selection"],a:1,x:"Your L9 evals make this safe: downgrade with proof, not vibes."}),
+E({t:"mc",q:"The artefact that makes cost work hireable:",o:["A feeling of savings","Before/after numbers: same accuracy, 60% lower cost — from your own logs","A tweet","A new framework"],a:1,x:"Cost optimisation with receipts is rare. Your logs ARE the receipts."})
+]},
+{id:"L11M3",icon:"📋",title:"Failure modes & runbooks",lesson:'<h3>LESSON · THE CATALOGUE</h3><p>Production AI fails in patterns. Your living <b>failure-mode catalogue</b> records each one: what happened, how detected, the fix, and <b>how to catch it pre-production next time</b>.</p><p>The classics: <b>drift</b> (the Fed changes how it writes; scores skew — detect via score-distribution monitoring), <b>bad parses</b> (site redesign breaks the scraper — detect via zero-docs alerts), <b>hallucinated citations</b> (detect via the eval gate), <b>cost spikes</b> (a retry loop goes hot — detect via daily budget alerts). Each entry pairs with a <b>runbook</b>: when alert X fires, do Y. This document plus your GARP RAI reading = governance made concrete — the rare-triple artefact.</p>',
+ex:[
+E({t:"mc",q:"A failure-mode catalogue entry contains…",o:["Just a complaint","What happened, detection, the fix, and how to catch it pre-production next time","Screenshots only","The person responsible"],a:1,x:"Failure → control. Each entry upgrades the system permanently."}),
+E({t:"mc",q:"Scores skew hawkish after the Fed changes its writing style. This is…",o:["A hardware fault","Drift — the input distribution changed; detect via score-distribution monitoring","User error","Impossible"],a:1,x:"Language changes under you. Monitoring distributions catches what unit tests cannot."}),
+E({t:"mc",q:"The scraper silently returns zero documents after a site redesign. The control:",o:["Hope","An anomaly alert: zero new docs on an expected ingestion day = page someone","Weekly manual checks","Bigger servers"],a:1,x:"Absence-of-data is itself a signal to alert on."}),
+E({t:"mc",q:"A retry loop spikes the bill 10x overnight. The pre-built control:",o:["A bigger credit card","Daily budget alert + retry caps with backoff","Disable retries forever","Check invoices monthly"],a:1,x:"Budget alerts + bounded retries: the L10 leash philosophy applied to money."}),
+E({t:"mc",q:"A runbook is…",o:["A jogging diary","When alert X fires, do Y — pre-decided steps so 2am incidents are calm","Marketing material","A backup"],a:1,x:"Decide while calm, execute while stressed. Production maturity in one document."}),
+E({t:"mc",q:"Why does this catalogue impress BOTH engineers and risk teams?",o:["It is long","It is governance expressed as working controls — second-line thinking in running code","Nice font","It cites regulations"],a:1,x:"Engineers see ops maturity; risk sees control design. You speak both natively — the triple."})
+]}
+],
+boss:{title:"The Production Boss",pass:75,ex:[
+E({t:"mc",q:"Friday 5pm: alert — JSON validation failures spiked on tonight&#39;s scoring run. First move?",o:["Mute until Monday","Open the logs, find a failing doc id, reproduce locally with that exact input","Redeploy randomly","Raise max_tokens"],a:1,x:"Alert → logs → reproduce with the real input. Stuck Protocol, production edition."}),
+E({t:"po",q:"Monthly spend: $42 generation, $6 embeddings, $2 judge. Generation share, rounded? (like 84%)",a:["84%","84"],x:"42/50 = 84% — so caching, batching, and right-sizing aim at generation."}),
+E({t:"mc",q:"The caching discount applies to…",o:["The whole call","The shared identical PREFIX of the prompt","Output tokens","The first call only"],a:1,x:"Stable-first design maximises the cached span."}),
+E({t:"mc",q:"Your nightly re-score job belongs on…",o:["Real-time API at 9am","The batch API overnight at about half price","Your laptop, awake","A spreadsheet"],a:1,x:"Patient bulk work takes the cheap lane."}),
+E({t:"mc",q:"Which monitoring catches DRIFT that unit tests cannot?",o:["Code coverage","Score-distribution tracking over time — inputs changed even though code did not","Linting","Uptime checks"],a:1,x:"Tests check code; distributions check the world."}),
+E({t:"pa",q:"Order the incident response:",lines:["alert fires (anomaly or error spike)","open structured logs, isolate failing inputs","reproduce locally with the exact input","fix + add a regression test or eval case","write or update the runbook entry"],x:"Detect → isolate → reproduce → fix-with-proof → document. Every incident strengthens the system."})
+]}},
+
+/* ===== L12 ===== */
+{id:"L12",name:"Capstone & Interview",month:"MAY",tag:"system design · packaging · the job",color:"#C77DFF",color2:"#6a3f8f",phase:"PHASE 4 · SPECIALISATION",desc:"Assemble everything. Prove it in public. Get hired.",
+missions:[
+{id:"L12M1",icon:"🏗️",title:"System design — the whiteboard",lesson:'<h3>LESSON · END TO END, OUT LOUD</h3><p>The AI-engineer interview question is: <i>design a system that answers questions over our documents.</i> Your answer, structured:</p><p><b>1 · Clarify</b> — doc types? volume? users? latency? consequence level? <b>2 · Ingestion</b> — fetch politely, parse, chunk with metadata, embed, store (Postgres + pgvector). <b>3 · Query path</b> — embed question, top-k retrieve, grounded prompt, answer with citations, refuse on low confidence. <b>4 · Quality</b> — golden set, LLM-as-judge, eval gate in CI. <b>5 · Operations</b> — Docker, monitoring, structured logs, cost levers, failure catalogue.</p><p>Then the killer move: <b>name the trade-offs unprompted</b> — chunking is measurable, k is a dial, judges need calibration, caching wants stable-first prompts. Trade-offs separate seniors from tutorial-followers.</p>',
+ex:[
+E({t:"pa",q:"Order the whiteboard walkthrough:",lines:["clarify requirements (docs, users, latency, stakes)","ingestion: parse → chunk+metadata → embed → store","query: embed → retrieve top-k → grounded answer + citations","quality: golden set + judge + eval gate in CI","operations: containers, monitoring, cost levers"],x:"Requirements → data in → answers out → proof → keep-alive. The senior shape."}),
+E({t:"mc",q:"The FIRST thing to do with any design question:",o:["Draw boxes immediately","Clarify requirements — volume, users, latency, stakes shape every choice","Name a framework","Quote a paper"],a:1,x:"Designing before clarifying is the number-one junior tell."}),
+E({t:"mc",q:"Interviewer: why not fine-tune instead of RAG?",o:["Fine-tuning is illegal","RAG handles changing documents, gives citations, updates by re-ingesting; fine-tuning bakes knowledge in and goes stale — different tools for different problems","RAG is newer","No difference"],a:1,x:"Trade-off fluency: when each tool wins. Fit, not dogma."}),
+E({t:"mc",q:"Interviewer: how do you KNOW your system is good?",o:["Users seem happy","Golden set + calibrated judge + thresholds in CI — here are the curves over time","It uses the best model","I test it sometimes"],a:1,x:"The eval answer — your differentiator, with receipts in public repos."}),
+E({t:"mc",q:"They ask about a part you have not built (say, streaming). Best move:",o:["Bluff confidently","Say so plainly, then reason from principles aloud — honest reasoning beats fake certainty","Change the subject","Recite a blog post"],a:1,x:"Interviewers probe for edges; behaviour AT the edge is the signal."}),
+E({t:"mc",q:"Your closing line for why-you:",o:["I learn fast","I have shipped grounded LLM systems with eval gates, in public, and I speak Markets and model-risk natively — the bridge your team is missing","I love AI","I know Python"],a:1,x:"Shipped + measured + domain + governance. Nobody else in the room has all four."})
+]},
+{id:"L12M2",icon:"📦",title:"Packaging & open source",lesson:'<h3>LESSON · USABLE BY STRANGERS</h3><p>The capstone (Markets LLM Eval Kit) becomes real when a stranger can use it:</p><p><b>README</b> — what it does in one paragraph, install, a 5-line quickstart, an honest limitations section. <b>Structure</b> — clean src layout, pyproject.toml, pinned dependencies. <b>License</b> — MIT for maximum adoption. <b>Versioning</b> — semver: MAJOR.MINOR.PATCH (breaking.feature.fix). <b>pip-installable</b> — so <code>pip install markets-eval-kit</code> just works.</p><p>Then the write-up: <i>12 months, 3 systems, what I learned shipping LLMs for Markets</i> — numbers, architecture diagrams, the failure catalogue&#39;s greatest hits. Public proof compounds: every reader is a potential referral.</p>',
+ex:[
+E({t:"mc",q:"A stranger lands on your repo. The README must answer FIRST:",o:["Your biography","What this does, how to install, a working 5-line example","The full API reference","Commit history"],a:1,x:"What-install-quickstart in 30 seconds, or they leave."}),
+E({t:"mc",q:"Version 1.4.2 → you fix a bug, breaking nothing. New version:",o:["2.0.0","1.5.0","1.4.3","1.4.2-fixed"],a:2,x:"PATCH for fixes: 1.4.3. MINOR adds features; MAJOR breaks compatibility."}),
+E({t:"mc",q:"You rename a public function. Semver says:",o:["PATCH","MINOR","MAJOR — it breaks existing users","No bump"],a:2,x:"Breaking change = MAJOR. Downstream users depend on your discipline."}),
+E({t:"mc",q:"MIT license signals…",o:["No one may use it","Use freely, including commercially — maximum adoption for a portfolio project","Government only","Payment required"],a:1,x:"For credibility-building open source, permissive wins."}),
+E({t:"mc",q:"The limitations section in your README…",o:["Weakens the project","Builds trust — honest scope is a senior signal; hiding limits is a junior one","Should be deleted","Is legal boilerplate"],a:1,x:"Honest limits read as confidence. Reviewers notice."}),
+E({t:"mc",q:"Why does the final write-up matter as much as the code?",o:["It does not","Most evaluators read prose, not source — the write-up is the interface to your year of proof","Words are easier","SEO"],a:1,x:"Code convinces engineers; the write-up convinces everyone else who decides."})
+]},
+{id:"L12M3",icon:"🎤",title:"Interview drills",lesson:'<h3>LESSON · TRANSLATING THE YEAR</h3><p>Three drills, repeated until smooth:</p><p><b>Explain-to-anyone</b> — embeddings, RAG, eval gates in plain language for a PM (your Markets-translation muscle, already elite). <b>The debugging story</b> — pick a real incident from your year; tell it as symptom → isolation → reproduction → fix → regression-proof. Interviewers ask this to see whether you have ACTUALLY operated systems. <b>The metrics story</b> — every claim with a number: hit rate X→Y, cost cut Z%, refusal accuracy W. Numbers are the dialect of credibility.</p><p>And the framing that wins: you are not a career-changer apologising for arriving late. You are a <b>Markets native who now ships measured AI systems</b> — the intersection they cannot hire.</p>',
+ex:[
+E({t:"mc",q:"Plain-language test — the best one-line PM explanation of an embedding:",o:["A compressed neural representation in latent space","It turns text into numbers that capture meaning, so similar ideas sit near each other and we can search by meaning","A 1536-dimension float array","An encryption of the text"],a:1,x:"Accurate AND human. Practise saying it out loud — the words must live in your mouth, not just your eyes."}),
+E({t:"mc",q:"The debugging-story structure interviewers want:",o:["Blame the framework","Symptom → isolate → reproduce → fix → add the regression test or eval","It just started working","I asked a colleague"],a:1,x:"The arc proves operational maturity. Pick your best real incident now."}),
+E({t:"mc",q:"Which sentence lands hardest?",o:["I am passionate about AI","My eval-gated RAG system holds 4.6/5 faithfulness across 50 desk-realistic questions, and the gate has blocked 3 regressions","I have done many courses","I use LLMs daily"],a:1,x:"Specific, measured, operational. The year was built to make this sentence true."}),
+E({t:"mc",q:"They ask: why trust a self-taught engineer?",o:["Take offence","Point at public proof: deployed systems, green CI, eval curves, merged external PRs — plus the domain and governance edge no bootcamp teaches","Promise weekends","List courses"],a:1,x:"Proof beats pedigree. Your whole year is the answer to this exact question."}),
+E({t:"mc",q:"Salary-negotiation instinct, from your OWN playbook:",o:["Accept the first number","Anchor on total compensation and the scarcity of your triple — the same discipline you ran at Citi","Apologise for asking","Avoid the topic"],a:1,x:"You have literally run this play before. Run it again, holding rarer cards."}),
+E({t:"mc",q:"The final boss is next. The state of play:",o:["You are behind","You hold 12 levels of systems knowledge anchored to 3 shipped projects — finish the fight, then go build","Restart Level 1","The game builds the career by itself"],a:1,x:"Knowledge here + keyboard hours there = the engineer. One boss left."})
+]}
+],
+boss:{title:"FINAL BOSS · The Hiring Panel",pass:80,ex:[
+E({t:"pa",q:"PANEL: Walk us through your MacroLens architecture, end to end:",lines:["scheduled scrapers fetch + cache central-bank statements","documents indexed in Postgres with metadata","versioned prompt scores each doc via the LLM API (structured JSON)","back-test joins scores to subsequent rate decisions","dashboard + API serve results; CI runs tests and evals on every push"],x:"Ingest → store → score → verify → serve, gated by CI. You built it; now you can also say it."}),
+E({t:"mc",q:"PANEL: Your RAG system answered wrongly in a demo. Diagnose live:",o:["The model is bad","Stage by stage: was the right chunk retrieved? Yes → generation/prompt; no → chunking, embeddings, or k","Restart the demo","Blame the data"],a:1,x:"Stage-wise diagnosis under pressure — the L8/L9 instinct, performed."}),
+E({t:"mc",q:"PANEL: Cut this system&#39;s costs 50% without hurting quality — how?",o:["Smaller model, hope","Measure first from logs; then prompt caching (stable-first), batch lanes for bulk, right-size models where evals prove parity","Fewer users","Cancel monitoring"],a:1,x:"Measure → lever → verify with evals. The L11 trio, on command."}),
+E({t:"mc",q:"PANEL: An agent with a send_email tool — what could go wrong, and what do you do?",o:["Nothing, models are aligned","Wrong recipient or content at scale: validate args, draft-only by default, human approval on sends, step caps, full audit logs","Disable email forever","Trust temperature 0"],a:1,x:"Threat → layered controls. Governance instinct as engineering — the triple, live."}),
+E({t:"po",q:"PANEL: The gate requires 90% refusal accuracy on 10 no-answer questions. Maximum hallucinated answers allowed? (number)",a:["1"],x:"90% of 10 = 9 refusals minimum → at most 1 miss. You read thresholds like a risk officer."}),
+E({t:"mc",q:"PANEL: Why you over a CS grad with 5 years of backend?",o:["I want it more","They bring generic systems experience; I bring shipped LLM systems WITH eval discipline, plus Markets fluency and model-risk literacy — for this seat, the intersection beats the head start","I am cheaper","No real answer"],a:1,x:"Not better at everything — irreplaceable at THIS. Say it calmly; it is true."}),
+E({t:"mc",q:"PANEL: Where does AI quality assurance go next?",o:["Vibes will improve","Evals move from afterthought to gate: golden sets, calibrated judges, CI enforcement, drift monitoring — quality engineered like reliability","Bigger models fix everything","QA disappears"],a:1,x:"A point of view earned by building — panels remember candidates who have one."}),
+E({t:"mc",q:"PANEL: Last question. The offer comes. What happens on day one?",o:["Coast — you made it","Same engine: ship small, measure, log the confusion, repeat — the habits ARE the engineer","Delete the side projects","Stop learning"],a:1,x:"The game ends; the operating system continues. Congratulations, AI Engineer. 👑"})
+]}}
+];
+var LABS=[
+{id:"f1",lvl:1,title:"First Light",icon:"\ud83d\udda8\ufe0f",anim:"glow",fn:"greet",brief:"Return the exact string <b>Hola, Pupu</b>. Your first spell.",starter:"def greet():\n    # return the greeting text\n    pass\n",tests:[{a:"()",e:"'Hola, Pupu'"}]},
+{id:"f2",lvl:1,title:"The Doubler",icon:"\u2716\ufe0f",anim:"glow",fn:"double",brief:"Return <code>n</code> multiplied by 2.",starter:"def double(n):\n    # return n times two\n    pass\n",tests:[{a:"(5,)",e:"10"},{a:"(0,)",e:"0"},{a:"(-3,)",e:"-6"},{a:"(100,)",e:"200"}]},
+{id:"f3",lvl:1,title:"Greater of Two",icon:"\u2696\ufe0f",anim:"glow",fn:"bigger",brief:"Return the larger of <code>a</code> and <code>b</code>. (No need for built-in max \u2014 try an if.)",starter:"def bigger(a, b):\n    # return the larger one\n    pass\n",tests:[{a:"(3, 7)",e:"7"},{a:"(10, 2)",e:"10"},{a:"(5, 5)",e:"5"},{a:"(-1, -9)",e:"-1"}]},
+{id:"f4",lvl:2,title:"Sum to N",icon:"\u2795",anim:"bars",fn:"sum_to",brief:"Return the sum of all integers from 1 to <code>n</code> inclusive. Use a loop.",starter:"def sum_to(n):\n    total = 0\n    # loop and add\n    return total\n",tests:[{a:"(5,)",e:"15"},{a:"(1,)",e:"1"},{a:"(10,)",e:"55"},{a:"(100,)",e:"5050"}]},
+{id:"f5",lvl:2,title:"Count the Hawks",icon:"\ud83e\udd85",anim:"bars",fn:"count_hawks",brief:"Given a list of scores, return how many are <b>greater than 0</b>.",starter:"def count_hawks(scores):\n    count = 0\n    # count positives\n    return count\n",tests:[{a:"([2, -1, 4, 0, 1],)",e:"3"},{a:"([],)",e:"0"},{a:"([-5, -2],)",e:"0"},{a:"([1, 2, 3],)",e:"3"}]},
+{id:"f6",lvl:2,title:"The Maximum",icon:"\ud83d\udcc8",anim:"bars",fn:"find_max",brief:"Return the largest number in a non-empty list \u2014 without using built-in max().",starter:"def find_max(nums):\n    best = nums[0]\n    # scan the rest\n    return best\n",tests:[{a:"([3, 7, 2],)",e:"7"},{a:"([5],)",e:"5"},{a:"([-1, -9, -2],)",e:"-1"},{a:"([4, 4, 9, 1],)",e:"9"}]},
+{id:"f7",lvl:2,title:"Reverse the List",icon:"\ud83d\udd04",anim:"pulse",fn:"reverse_list",brief:"Return a new list with the elements of <code>items</code> in reverse order.",starter:"def reverse_list(items):\n    # build and return reversed list\n    pass\n",tests:[{a:"([1, 2, 3],)",e:"[3, 2, 1]"},{a:"([],)",e:"[]"},{a:"(['a', 'b'],)",e:"['b', 'a']"},{a:"([9],)",e:"[9]"}]},
+{id:"f8",lvl:3,title:"Forge a Function: DV01",icon:"\ud83e\udde9",anim:"glow",fn:"dv01",brief:"Return <code>notional * bps * 0.0001</code>. Default <code>bps</code> to 1.",starter:"def dv01(notional, bps=1):\n    # return the risk\n    pass\n",tests:[{a:"(1000000,)",e:"100.0"},{a:"(1000000, 2)",e:"200.0"},{a:"(0,)",e:"0.0"},{a:"(500000, 4)",e:"200.0"}]},
+{id:"f9",lvl:3,title:"Safe Divide",icon:"\ud83d\udedf",anim:"glow",fn:"safe_div",brief:"Return <code>a / b</code>, but if <code>b</code> is 0 return the string <b>undefined</b>. Use try/except.",starter:"def safe_div(a, b):\n    # guard against zero division\n    pass\n",tests:[{a:"(10, 2)",e:"5.0"},{a:"(9, 0)",e:"'undefined'"},{a:"(0, 5)",e:"0.0"},{a:"(7, 0)",e:"'undefined'"}]},
+{id:"f10",lvl:3,title:"Word Count",icon:"\ud83d\udd24",anim:"bars",fn:"word_count",brief:"Return the number of words in a sentence (words are separated by spaces). Empty string \u2192 0.",starter:"def word_count(text):\n    # split and count\n    pass\n",tests:[{a:"('buy the dip',)",e:"3"},{a:"('',)",e:"0"},{a:"('one',)",e:"1"},{a:"('a b c d e',)",e:"5"}]},
+{id:"f11",lvl:3,title:"Running Total",icon:"\ud83e\uddee",anim:"bars",fn:"running_total",brief:"Given a list, return a NEW list of running (cumulative) sums. [1,2,3] \u2192 [1,3,6].",starter:"def running_total(nums):\n    out = []\n    running = 0\n    # accumulate\n    return out\n",tests:[{a:"([1, 2, 3],)",e:"[1, 3, 6]"},{a:"([],)",e:"[]"},{a:"([5],)",e:"[5]"},{a:"([2, -2, 4],)",e:"[2, 0, 4]"}]},
+{id:"f12",lvl:4,title:"Read the Ledger",icon:"\ud83d\uddc4\ufe0f",anim:"glow",fn:"get_score",brief:"Given a doc dict, return the value of its <code>\"score\"</code> key.",starter:"def get_score(doc):\n    # return the score field\n    pass\n",tests:[{a:"({'bank': 'fed', 'score': 2.5},)",e:"2.5"},{a:"({'score': -1},)",e:"-1"},{a:"({'bank': 'ecb', 'score': 0},)",e:"0"}]},
+{id:"f13",lvl:4,title:"Safe Lookup",icon:"\ud83d\udd11",anim:"glow",fn:"lookup",brief:"Return the value for <code>key</code> in <code>d</code>, or <b>0</b> if the key is missing. Use .get().",starter:"def lookup(d, key):\n    # return value or 0 if absent\n    pass\n",tests:[{a:"({'a': 5}, 'a')",e:"5"},{a:"({'a': 5}, 'b')",e:"0"},{a:"({}, 'x')",e:"0"},{a:"({'fed': 4.25}, 'fed')",e:"4.25"}]},
+{id:"f14",lvl:4,title:"Average Score",icon:"\ud83d\udcca",anim:"bars",fn:"avg_score",brief:"Given a list of score dicts (each with key <code>\"s\"</code>), return the average of all <code>s</code> values, rounded to 2 dp. Empty list \u2192 0.",starter:"def avg_score(rows):\n    if not rows:\n        return 0\n    # sum the \"s\" values, divide, round\n    pass\n",tests:[{a:"([{'s': 2}, {'s': 4}],)",e:"3.0"},{a:"([],)",e:"0"},{a:"([{'s': 1}, {'s': 2}, {'s': 2}],)",e:"1.67"},{a:"([{'s': -3}, {'s': 3}],)",e:"0.0"}]},
+{id:"f15",lvl:4,title:"Token Tally",icon:"\ud83e\udd16",anim:"glow",fn:"total_tokens",brief:"Given a usage dict with <code>input_tokens</code> and <code>output_tokens</code>, return their sum.",starter:"def total_tokens(usage):\n    # add input and output\n    pass\n",tests:[{a:"({'input_tokens': 1200, 'output_tokens': 80},)",e:"1280"},{a:"({'input_tokens': 0, 'output_tokens': 0},)",e:"0"},{a:"({'input_tokens': 500, 'output_tokens': 500},)",e:"1000"}]},
+{id:"f16",lvl:4,title:"Filter by Bank",icon:"\ud83c\udfe6",anim:"bars",fn:"by_bank",brief:"Given a list of dicts and a <code>bank</code> name, return a list of only the dicts whose <code>\"bank\"</code> matches.",starter:"def by_bank(rows, bank):\n    # return matching rows\n    pass\n",tests:[{a:"([{'bank': 'fed', 's': 1}, {'bank': 'ecb', 's': 2}, {'bank': 'fed', 's': 3}], 'fed')",e:"[{'bank': 'fed', 's': 1}, {'bank': 'fed', 's': 3}]"},{a:"([{'bank': 'boe'}], 'fed')",e:"[]"},{a:"([], 'fed')",e:"[]"}]},
+{id:"f17",lvl:4,title:"Clean the Number",icon:"\ud83e\uddf9",anim:"glow",fn:"clean_rate",brief:"A rate arrives as a messy string like <code>\" 4.25% \"</code>. Return it as a float (strip spaces and the % sign).",starter:"def clean_rate(s):\n    # strip whitespace and %, convert to float\n    pass\n",tests:[{a:"(' 4.25% ',)",e:"4.25"},{a:"('2%',)",e:"2.0"},{a:"('  0.5  ',)",e:"0.5"},{a:"('100%',)",e:"100.0"}]},
+{id:"f18",lvl:5,title:"Classify the Tone",icon:"\ud83d\udcdc",anim:"glow",fn:"classify",brief:"Given a numeric score, return <b>hawkish</b> if &gt;0, <b>dovish</b> if &lt;0, else <b>neutral</b>.",starter:"def classify(score):\n    # return the tone label\n    pass\n",tests:[{a:"(3,)",e:"'hawkish'"},{a:"(-2,)",e:"'dovish'"},{a:"(0,)",e:"'neutral'"},{a:"(0.1,)",e:"'hawkish'"}]},
+{id:"f19",lvl:5,title:"Clamp the Score",icon:"\ud83d\udddc\ufe0f",anim:"pulse",fn:"clamp",brief:"LLM scores should sit in [-5, 5]. Return the score clamped: below -5 becomes -5, above 5 becomes 5.",starter:"def clamp(score):\n    # keep within -5..5\n    pass\n",tests:[{a:"(7,)",e:"5"},{a:"(-9,)",e:"-5"},{a:"(3,)",e:"3"},{a:"(5,)",e:"5"},{a:"(-5,)",e:"-5"}]},
+{id:"f20",lvl:5,title:"Hit or Miss",icon:"\ud83c\udfaf",anim:"glow",fn:"is_hit",brief:"A prediction is a \"hit\" if a hawkish score (&gt;0) preceded a hike, OR a dovish score (&lt;0) preceded a cut. Given <code>score</code> and <code>move</code> (\"hike\"/\"cut\"/\"hold\"), return True/False.",starter:"def is_hit(score, move):\n    # hawkish+hike or dovish+cut\n    pass\n",tests:[{a:"(2, 'hike')",e:"True"},{a:"(-3, 'cut')",e:"True"},{a:"(2, 'cut')",e:"False"},{a:"(0, 'hold')",e:"False"},{a:"(-1, 'hike')",e:"False"}]},
+{id:"f21",lvl:5,title:"Hit Rate",icon:"\ud83d\udcd0",anim:"bars",fn:"hit_rate",brief:"Given a list of booleans (each True=hit), return the hit rate as a percentage integer. [T,T,F,T] \u2192 75. Empty \u2192 0.",starter:"def hit_rate(hits):\n    if not hits:\n        return 0\n    # percentage of True, as int\n    pass\n",tests:[{a:"([True, True, False, True],)",e:"75"},{a:"([],)",e:"0"},{a:"([False, False],)",e:"0"},{a:"([True, True],)",e:"100"}]},
+{id:"f22",lvl:5,title:"Parse the JSON",icon:"\ud83e\uddec",anim:"glow",fn:"parse_score",brief:"Given a JSON string like <code>'{\"score\": 3, \"conf\": 0.8}'</code>, parse it and return the score. Use the json module.",starter:"import json\ndef parse_score(raw):\n    # parse JSON, return the score\n    pass\n",tests:[{a:"('{\"score\": 3, \"conf\": 0.8}',)",e:"3"},{a:"('{\"score\": -2}',)",e:"-2"},{a:"('{\"score\": 0, \"x\": 1}',)",e:"0"}]},
+{id:"f23",lvl:5,title:"The Scoring Loop",icon:"\u2699\ufe0f",anim:"bars",fn:"score_all",brief:"Given a list of statement dicts (each with <code>\"text\"</code>), return a list of word-counts \u2014 one per statement. This is a real ingestion pattern.",starter:"def score_all(statements):\n    out = []\n    # for each, count words in its text\n    return out\n",tests:[{a:"([{'text': 'rates will rise'}, {'text': 'hold steady'}],)",e:"[3, 2]"},{a:"([],)",e:"[]"},{a:"([{'text': 'one'}],)",e:"[1]"}]},
+{id:"f24",lvl:6,title:"Group and Count",icon:"\ud83d\udd0d",anim:"bars",fn:"tally",brief:"Given a list of bank names, return a dict mapping each bank to how many times it appears. [\"fed\",\"ecb\",\"fed\"] \u2192 {\"fed\":2,\"ecb\":1}.",starter:"def tally(banks):\n    counts = {}\n    # count each\n    return counts\n",tests:[{a:"(['fed', 'ecb', 'fed'],)",e:"{'fed': 2, 'ecb': 1}"},{a:"([],)",e:"{}"},{a:"(['boe'],)",e:"{'boe': 1}"},{a:"(['a', 'a', 'a'],)",e:"{'a': 3}"}]},
+{id:"f25",lvl:6,title:"Average by Group",icon:"\ud83d\udcca",anim:"bars",fn:"avg_by_bank",brief:"Given rows of <code>(bank, score)</code> tuples, return a dict of each bank's AVERAGE score, rounded to 1 dp. This is GROUP BY in Python.",starter:"def avg_by_bank(rows):\n    sums, counts = {}, {}\n    # accumulate per bank, then average\n    result = {}\n    return result\n",tests:[{a:"([('fed', 2), ('fed', 4), ('ecb', -2)],)",e:"{'fed': 3.0, 'ecb': -2.0}"},{a:"([],)",e:"{}"},{a:"([('boe', 1)],)",e:"{'boe': 1.0}"}]},
+{id:"f26",lvl:6,title:"Top N",icon:"\ud83c\udfc6",anim:"bars",fn:"top_n",brief:"Given a list of numbers and <code>n</code>, return the <code>n</code> largest, sorted high to low.",starter:"def top_n(nums, n):\n    # sort descending, take n\n    pass\n",tests:[{a:"([3, 9, 1, 7, 5], 2)",e:"[9, 7]"},{a:"([1, 2], 5)",e:"[2, 1]"},{a:"([], 3)",e:"[]"},{a:"([4, 4, 4], 2)",e:"[4, 4]"}]},
+{id:"f27",lvl:6,title:"Sort Records",icon:"\ud83d\uddc2\ufe0f",anim:"bars",fn:"rank",brief:"Given a list of dicts each with a <code>\"score\"</code>, return them sorted by score descending. Use sorted with a key.",starter:"def rank(rows):\n    # sort by score, highest first\n    pass\n",tests:[{a:"([{'score': 1}, {'score': 3}, {'score': 2}],)",e:"[{'score': 3}, {'score': 2}, {'score': 1}]"},{a:"([],)",e:"[]"},{a:"([{'score': 5}],)",e:"[{'score': 5}]"}]},
+{id:"f28",lvl:7,title:"The Test Itself",icon:"\ud83e\uddea",anim:"glow",fn:"add",brief:"Write <code>add(a,b)</code> returning their sum. (The Forge will test it like a unit test would.)",starter:"def add(a, b):\n    # return the sum\n    pass\n",tests:[{a:"(2, 3)",e:"5"},{a:"(0, 0)",e:"0"},{a:"(-1, 1)",e:"0"},{a:"(100, 200)",e:"300"}]},
+{id:"f29",lvl:7,title:"Validate Input",icon:"\u2705",anim:"glow",fn:"valid_score",brief:"Return True if <code>score</code> is a number within [-5,5], else False. Reject strings and out-of-range.",starter:"def valid_score(score):\n    # must be int/float AND within range\n    pass\n",tests:[{a:"(3,)",e:"True"},{a:"(9,)",e:"False"},{a:"('hi',)",e:"False"},{a:"(-5,)",e:"True"},{a:"(5.5,)",e:"False"}]},
+{id:"f30",lvl:7,title:"Retry Wrapper",icon:"\ud83d\udd01",anim:"pulse",fn:"first_ok",brief:"Given a list of results where None means \"failed\", return the FIRST non-None value, or the string <b>all-failed</b> if every entry is None.",starter:"def first_ok(results):\n    # return first non-None, else \"all-failed\"\n    pass\n",tests:[{a:"([None, None, 5],)",e:"5"},{a:"([None, None],)",e:"'all-failed'"},{a:"([3, 4],)",e:"3"},{a:"([],)",e:"'all-failed'"}]},
+{id:"f31",lvl:8,title:"Dot Product",icon:"\ud83e\udded",anim:"pulse",fn:"dot",brief:"Return the dot product of two equal-length vectors: sum of paired products. [1,2,3]\u00b7[4,5,6] = 32.",starter:"def dot(a, b):\n    # sum of a[i]*b[i]\n    pass\n",tests:[{a:"([1, 2, 3], [4, 5, 6])",e:"32"},{a:"([1, 0], [0, 1])",e:"0"},{a:"([2, 2], [3, 3])",e:"12"},{a:"([1], [5])",e:"5"}]},
+{id:"f32",lvl:8,title:"Cosine Similarity",icon:"\ud83d\udcd0",anim:"pulse",fn:"cosine",brief:"Return cosine similarity of two vectors, rounded to 2 dp: dot(a,b) / (|a|\u00b7|b|). The heart of semantic search.",starter:"import math\ndef cosine(a, b):\n    dot = sum(x*y for x, y in zip(a, b))\n    # magnitudes, then divide, then round 2dp\n    pass\n",tests:[{a:"([1, 0, 1], [1, 0, 0])",e:"0.71"},{a:"([1, 0], [1, 0])",e:"1.0"},{a:"([1, 0], [0, 1])",e:"0.0"},{a:"([2, 2], [2, 2])",e:"1.0"}]},
+{id:"f33",lvl:8,title:"Top-K Retrieval",icon:"\ud83c\udfaf",anim:"bars",fn:"retrieve",brief:"Given a list of <code>(id, similarity)</code> tuples and <code>k</code>, return the ids of the top-k by similarity, highest first.",starter:"def retrieve(scored, k):\n    # sort by similarity desc, return their ids\n    pass\n",tests:[{a:"([('a', 0.9), ('b', 0.3), ('c', 0.7)], 2)",e:"['a', 'c']"},{a:"([('x', 0.5)], 5)",e:"['x']"},{a:"([], 3)",e:"[]"}]},
+{id:"f34",lvl:8,title:"The Chunker",icon:"\u2702\ufe0f",anim:"pulse",fn:"chunk",brief:"Split <code>text</code> into chunks of <code>size</code> characters. Return the list of chunks. \"abcdefghij\" size 4 \u2192 [\"abcd\",\"efgh\",\"ij\"].",starter:"def chunk(text, size):\n    # slice into pieces of length size\n    pass\n",tests:[{a:"('abcdefghij', 4)",e:"['abcd', 'efgh', 'ij']"},{a:"('abc', 5)",e:"['abc']"},{a:"('', 3)",e:"[]"},{a:"('aabb', 2)",e:"['aa', 'bb']"}]},
+{id:"f35",lvl:8,title:"Chunk with Overlap",icon:"\ud83d\udd17",anim:"pulse",fn:"starts",brief:"Return the START index of each chunk given <code>length</code>, <code>size</code>, and <code>overlap</code>. Stride = size \u2212 overlap. length 10, size 4, overlap 1 \u2192 [0,3,6,9].",starter:"def starts(length, size, overlap):\n    stride = size - overlap\n    out = []\n    # collect start indices\n    return out\n",tests:[{a:"(10, 4, 1)",e:"[0, 3, 6, 9]"},{a:"(5, 5, 0)",e:"[0]"},{a:"(6, 3, 1)",e:"[0, 2, 4]"},{a:"(8, 4, 0)",e:"[0, 4]"}]},
+{id:"f36",lvl:9,title:"The Judge's Mean",icon:"\u2696\ufe0f",anim:"bars",fn:"judge_mean",brief:"Given judge scores, return the mean rounded to 1 dp. [5,5,4,2,5] \u2192 4.2.",starter:"def judge_mean(scores):\n    # mean to 1 decimal\n    pass\n",tests:[{a:"([5, 5, 4, 2, 5],)",e:"4.2"},{a:"([5, 5],)",e:"5.0"},{a:"([1, 2, 3, 4],)",e:"2.5"},{a:"([3],)",e:"3.0"}]},
+{id:"f37",lvl:9,title:"The Eval Gate",icon:"\ud83d\udea6",anim:"glow",fn:"gate",brief:"Given <code>correctness</code> and <code>faithfulness</code> scores, return <b>pass</b> only if correctness \u2265 4.0 AND faithfulness \u2265 4.5, else <b>block</b>.",starter:"def gate(correctness, faithfulness):\n    # both thresholds must pass\n    pass\n",tests:[{a:"(4.2, 4.6)",e:"'pass'"},{a:"(4.8, 3.1)",e:"'block'"},{a:"(3.9, 5.0)",e:"'block'"},{a:"(4.0, 4.5)",e:"'pass'"}]},
+{id:"f38",lvl:9,title:"Refusal Accuracy",icon:"\ud83d\udee1\ufe0f",anim:"bars",fn:"accuracy",brief:"Given a list of <code>(in_corpus, answered)</code> booleans, count it correct when the model answered IF in_corpus, and refused (not answered) if NOT in_corpus. Return accuracy as an integer percent.",starter:"def accuracy(cases):\n    if not cases:\n        return 0\n    correct = 0\n    # answered==in_corpus is the correct behaviour\n    return round(correct / len(cases) * 100)\n",tests:[{a:"([(True, True), (False, False), (True, True), (False, True)],)",e:"75"},{a:"([],)",e:"0"},{a:"([(True, True)],)",e:"100"},{a:"([(False, True), (False, True)],)",e:"0"}]},
+{id:"f39",lvl:10,title:"Route the Request",icon:"\ud83d\udee0\ufe0f",anim:"glow",fn:"route",brief:"Return <b>macrolens</b> if \"fed\", \"ecb\", or \"boe\" appears in <code>q</code> (case-insensitive), else <b>filings</b>.",starter:"def route(q):\n    # check for any central bank keyword\n    pass\n",tests:[{a:"('Latest Fed minutes',)",e:"'macrolens'"},{a:"('JPM 10-K risk factors',)",e:"'filings'"},{a:"('ECB decision',)",e:"'macrolens'"},{a:"('revenue guidance',)",e:"'filings'"}]},
+{id:"f40",lvl:11,title:"Cost Tally",icon:"\ud83d\udcb8",anim:"bars",fn:"total_cost",brief:"Given a list of per-call costs, return the total formatted as a string like <b>$0.42</b> (dollar sign, 2 dp).",starter:"def total_cost(costs):\n    total = sum(costs)\n    # format with $ and 2 decimals\n    pass\n",tests:[{a:"([0.12, 0.08, 0.15, 0.07],)",e:"'$0.42'"},{a:"([],)",e:"'$0.00'"},{a:"([1.0],)",e:"'$1.00'"},{a:"([0.005, 0.005],)",e:"'$0.01'"}]},
+{id:"f41",lvl:12,title:"The Backtest",icon:"\ud83c\udfd7\ufe0f",anim:"pulse",fn:"backtest",brief:"CAPSTONE. Given paired lists <code>scores</code> and <code>moves</code> (move = \"hike\"/\"cut\"/\"hold\"), compute the hit rate as an integer percent. A hit = (score&gt;0 and hike) or (score&lt;0 and cut). This is MacroLens, in miniature.",starter:"def backtest(scores, moves):\n    if not scores:\n        return 0\n    hits = 0\n    # pair them up, count hits, return percent\n    return round(hits / len(scores) * 100)\n",tests:[{a:"([2, -3, 1, -1], ['hike', 'cut', 'hold', 'cut'])",e:"75"},{a:"([], [])",e:"0"},{a:"([1, 1], ['hike', 'hike'])",e:"100"},{a:"([2, -2], ['cut', 'hike'])",e:"0"}]},
+];/* ============================================================
+   THE FORGE — multi-test runtime (interview-grade)
+   Student writes a function; we call it with hidden test cases.
+   ============================================================ */
+var pyodide=null,pyLoading=false,curLab=0;
+
+function labDone(id){return !!(S.labs&&S.labs[id]);}
+function labsCleared(){return S.labs?Object.keys(S.labs).length:0;}
+
+var LAB_PHASES=[
+  {name:"ACT I · FOUNDATIONS",max:3},
+  {name:"ACT II · FIRST SHIP — MACROLENS",max:5},
+  {name:"ACT III · PRODUCTION MUSCLE",max:9},
+  {name:"ACT IV · SPECIALISATION",max:12}
+];
+function phaseFor(lvl){for(var i=0;i<LAB_PHASES.length;i++){if(lvl<=LAB_PHASES[i].max)return LAB_PHASES[i].name;}return "";}
+
+function renderLab(){
+  var sel=$("labsel");
+  var h="",lastPhase="";
+  for(var i=0;i<LABS.length;i++){
+    var L=LABS[i],ph=phaseFor(L.lvl);
+    if(ph!==lastPhase){lastPhase=ph;h+='<option disabled>──  '+ph+'  ──</option>';}
+    h+='<option value="'+i+'">'+(labDone(L.id)?"✦ ":"")+"Build "+(i+1)+" · "+L.title+(labDone(L.id)?"  ✓":"")+'</option>';
+  }
+  sel.innerHTML=h;
+  if(curLab>=LABS.length)curLab=0;
+  sel.value=curLab;
+  selectLab(curLab);
+}
+function selectLab(i){
+  curLab=parseInt(i,10);
+  if(isNaN(curLab))curLab=0;
+  var L=LABS[curLab],done=labDone(L.id);
+  $("labtask").innerHTML='<h3>'+L.icon+' Build '+(curLab+1)+' · '+L.title
+    +' <span style="color:var(--mut);font-weight:400">(Trial '+ROMAN[L.lvl-1]+')</span></h3>'
+    +L.brief
+    +'<span class="flag">'+(done?"✦ forged — refine freely":"")+' &nbsp;·&nbsp; '+L.tests.length+' hidden test cases must all pass</span>';
+  $("labed").value=L.starter;
+  $("runout").className="runout";$("runout").textContent="The forge is cold. Complete the function, then strike.";
+  drawForge(0);
+}
+
+async function ensurePyodide(){
+  if(pyodide)return pyodide;
+  if(pyLoading)return null;
+  pyLoading=true;
+  $("pystatus").textContent="⏳ Awakening the Python forge (~10MB, one-time download)…";
+  $("runbtn").disabled=true;
+  try{
+    if(!window.loadPyodide){
+      await new Promise(function(res,rej){
+        var s=document.createElement("script");
+        s.src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js";
+        s.onload=res;s.onerror=function(){rej(new Error("network"));};
+        document.head.appendChild(s);
+      });
+    }
+    pyodide=await loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.26.2/full/"});
+    $("pystatus").textContent="✦ Forge awakened. It stays warm now.";
+    $("runbtn").disabled=false;pyLoading=false;
+    return pyodide;
+  }catch(e){
+    $("pystatus").textContent="";$("runbtn").disabled=false;pyLoading=false;
+    $("runout").className="runout err";
+    $("runout").textContent="The forge needs the internet for its first awakening (to download Python). Connect once, then it works offline. Keep doing trials on the Path meanwhile.";
+    return null;
+  }
+}
+
+function jsesc(s){return s.replace(/\\/g,"\\\\").replace(/"/g,'\\"');}
+
+async function runLab(){
+  var L=LABS[curLab];
+  var code=$("labed").value;
+  var py=await ensurePyodide();
+  if(!py)return;
+  $("runout").className="runout";$("runout").textContent="⚙ forging…";
+
+  // Harness: run student code, call their fn with each test tuple, compare repr to expected.
+  var cases="[";
+  for(var i=0;i<L.tests.length;i++){
+    cases+="("+L.tests[i].a+", "+pyStr(L.tests[i].e)+")";
+    if(i<L.tests.length-1)cases+=", ";
+  }
+  cases+="]";
+  var harness=
+    "import json\n"+
+    "_results=[]\n"+
+    "_user_ns={}\n"+
+    "_src="+JSON.stringify(code)+"\n"+
+    "_err=None\n"+
+    "try:\n"+
+    "    exec(_src, _user_ns)\n"+
+    "except Exception as e:\n"+
+    "    _err='COMPILE: '+type(e).__name__+': '+str(e)\n"+
+    "if _err is None and "+JSON.stringify(L.fn)+" not in _user_ns:\n"+
+    "    _err='MISSING: define a function named "+L.fn+"'\n"+
+    "if _err is None:\n"+
+    "    _fn=_user_ns["+JSON.stringify(L.fn)+"]\n"+
+    "    _cases="+cases+"\n"+
+    "    for _args,_exp in _cases:\n"+
+    "        try:\n"+
+    "            _got=_fn(*_args)\n"+
+    "            _results.append({'ok': repr(_got)==_exp, 'got': repr(_got), 'exp': _exp, 'args': repr(_args)})\n"+
+    "        except Exception as e:\n"+
+    "            _results.append({'ok': False, 'got': 'ERROR: '+type(e).__name__+': '+str(e), 'exp': _exp, 'args': repr(_args)})\n"+
+    "json.dumps({'err': _err, 'results': _results})\n";
+
+  try{
+    var raw=await py.runPythonAsync(harness);
+    var verdict=JSON.parse(raw);
+    if(verdict.err){
+      $("runout").className="runout err";
+      var em=verdict.err;
+      $("runout").textContent="THE FORGE FRACTURED:\n"+em+"\n\n◆ Read it closely — a compile error means the code couldn't run at all. Check indentation and syntax.";
+      drawForge(0);return;
+    }
+    var passed=0,lines=[];
+    for(var r=0;r<verdict.results.length;r++){
+      var res=verdict.results[r];
+      if(res.ok)passed++;
+      lines.push((res.ok?"✓":"✗")+" "+L.fn+res.args+"  →  "+res.got+(res.ok?"":"   (expected "+res.exp+")"));
+    }
+    var all=passed===verdict.results.length;
+    if(all){
+      $("runout").className="runout ok";
+      $("runout").textContent=lines.join("\n")+"\n\n✦ ALL "+passed+" TESTS PASS. THE FORGE ACCEPTS IT.";
+      animateForge(L.anim);
+      var fresh=!labDone(L.id);
+      if(!S.labs)S.labs={};
+      if(fresh){S.labs[L.id]=1;S.xp+=30;}else{S.xp+=5;}
+      checkBadges();persistNow();
+      $("c-xp").textContent=S.xp;
+      setTimeout(function(){
+        renderLab();
+        if(fresh){sparks();openModal('<div class="big">'+L.icon+'</div><div class="deco">Build Forged</div><h2>'+L.title+'</h2><p>Real Python, '+verdict.results.length+' test cases, all green. <b>+30 essence.</b> '+(labsCleared()>=LABS.length?"<b>Every build forged — you are a Forgemaster.</b>":"")+'</p><button class="forge-btn" onclick="closeModal()">CONTINUE</button>');}
+      },900);
+    }else{
+      $("runout").className="runout err";
+      $("runout").textContent=lines.join("\n")+"\n\n"+passed+"/"+verdict.results.length+" passed. The forge rejects partial work — every case must hold. Fix the failing ones.";
+      drawForge(Math.max(0.15,passed/verdict.results.length*0.6));
+    }
+  }catch(e){
+    $("runout").className="runout err";
+    var msg=String(e.message||e);var clean=msg.length>460?("…"+msg.slice(-460)):msg;
+    $("runout").textContent="THE FORGE FRACTURED:\n"+clean+"\n\n◆ Read the LAST line first — it names the flaw.";
+    drawForge(0);
+  }
+}
+
+// expected values are already python-repr strings; embed as python string literal
+function pyStr(s){return JSON.stringify(s);}
+
+/* ---- canvas forge ---- */
+function drawForge(level){
+  var c=$("forge");if(!c)return;var x=c.getContext("2d");var W=c.width,H=c.height;
+  x.clearRect(0,0,W,H);
+  var g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#0d0f17");g.addColorStop(1,"#080a10");x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.fillStyle="#2a2418";x.fillRect(W/2-70,H-34,140,18);x.fillStyle="#1c1810";x.fillRect(W/2-40,H-50,80,18);
+  var glow=20+level*70;
+  var grad=x.createRadialGradient(W/2,H-44,2,W/2,H-44,glow);
+  grad.addColorStop(0,"rgba(232,200,116,"+(0.35+0.6*level)+")");
+  grad.addColorStop(0.5,"rgba(200,99,58,"+(0.3*level)+")");
+  grad.addColorStop(1,"rgba(0,0,0,0)");
+  x.fillStyle=grad;x.beginPath();x.arc(W/2,H-44,glow,0,Math.PI*2);x.fill();
+  if(level<=0){x.fillStyle="#6E654E";x.font="11px monospace";x.textAlign="center";x.fillText("forge dormant",W/2,24);}
+}
+var forgeAnim=null;
+function animateForge(kind){
+  var c=$("forge");if(!c)return;var x=c.getContext("2d");var W=c.width,H=c.height;
+  if(forgeAnim)cancelAnimationFrame(forgeAnim);var t=0;
+  function frame(){
+    t+=0.04;x.clearRect(0,0,W,H);
+    var g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#0d0f17");g.addColorStop(1,"#080a10");x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.fillStyle="#2a2418";x.fillRect(W/2-70,H-34,140,18);x.fillStyle="#1c1810";x.fillRect(W/2-40,H-50,80,18);
+    var pulse=(Math.sin(t*3)+1)/2;
+    if(kind==="bars"){for(var i=0;i<7;i++){var bh=10+((Math.sin(t*2+i*0.7)+1)/2)*70*Math.min(1,t);x.fillStyle="rgba(201,162,75,"+(0.5+0.4*pulse)+")";x.fillRect(40+i*((W-80)/7),H-60-bh,((W-80)/7)-8,bh);}}
+    else if(kind==="pulse"){for(var r=0;r<3;r++){var rad=((t*40)+(r*50))%160;x.strokeStyle="rgba(232,200,116,"+Math.max(0,0.6-rad/160)+")";x.lineWidth=2;x.beginPath();x.arc(W/2,H-44,rad,0,Math.PI*2);x.stroke();}}
+    var glow=40+pulse*60;var grad=x.createRadialGradient(W/2,H-44,2,W/2,H-44,glow);
+    grad.addColorStop(0,"rgba(232,200,116,0.95)");grad.addColorStop(0.5,"rgba(200,99,58,0.5)");grad.addColorStop(1,"rgba(0,0,0,0)");
+    x.fillStyle=grad;x.beginPath();x.arc(W/2,H-44,glow,0,Math.PI*2);x.fill();
+    for(var s=0;s<10;s++){var sy=H-44-((t*60+s*30)%120);var sx=W/2+Math.sin(t*2+s)*40;x.fillStyle="rgba(232,200,116,"+Math.max(0,1-((t*60+s*30)%120)/120)+")";x.fillRect(sx,sy,2,2);}
+    x.fillStyle="#E8C874";x.font="bold 13px Cinzel, serif";x.textAlign="center";x.fillText("✦ FORGED ✦",W/2,26);
+    if(t<3.2)forgeAnim=requestAnimationFrame(frame);else drawForge(1);
+  }
+  frame();
+}
+
+/* ============================================================ boot ============================================================ */
+function boot(){
+  detectStorage();
+  loadSave().then(function(saved){
+    if(saved&&typeof saved.xp==="number"){S=migrate(saved);}
+    startClock();renderMap();drawForge(0);go("home");
+    if(!saved){
+      openModal('<div class="big">⚜</div><div class="deco">The Path Begins</div><h2>ASCENSION</h2>'
+        +'<p style="text-align:left">Your 12-month engineer\'s journey, as a trial of twelve chapters — one per month — each with missions, a boss, and a real-Python build in the <b>Forge</b>.</p>'
+        +'<p style="text-align:left">• A short scroll, then <b>mostly doing</b>: predict outputs, find bugs, inscribe real code, order pipelines.<br>• In the <b>Forge</b>, you write Python that truly runs on your iPad.<br>• <b>Daily Drill</b> resurfaces old trials so knowledge sticks.<br>• Essence, streaks, ranks, and relics mark your rise.</p>'
+        +'<p style="text-align:left"><b>To save your soul:</b> open this file in <b>Safari</b> (not an app preview) and Add to Home Screen. The Chronicle tab always shows whether saving is live.</p>'
+        +'<p style="text-align:left;color:var(--gold-dim)">One truth: this trains the engineer; <b>shipping real code in public earns the title.</b> Walk both.</p>'
+        +'<button class="forge-btn" onclick="closeModal()">ENTER THE PATH</button>');
+    }
+  });
+}
+boot();
+
+</script>
+</body>
+</html>
