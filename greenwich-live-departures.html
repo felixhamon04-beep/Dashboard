@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Live Commute</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#000000;
+    --card:rgba(28,28,32,.88);
+    --card-2:#2c2c2e;
+    --text:#ffffff;
+    --text-2:rgba(235,235,245,.62);
+    --text-3:rgba(235,235,245,.32);
+    --sep:rgba(84,84,88,.45);
+    --green:#30d158;
+    --amber:#ffb340;
+    --red:#ff453a;
+    --blue:#64d2ff;
+    --gold:rgba(212,180,131,.9);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    background-image:
+      radial-gradient(900px 480px at 18% -8%, rgba(48,209,88,.07), transparent 60%),
+      radial-gradient(900px 520px at 85% 108%, rgba(255,179,64,.06), transparent 60%);
+    background-attachment:fixed;
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',sans-serif;
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* ================= LANDING ================= */
+  #landing{
+    min-height:100vh;min-height:100dvh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:48px;padding:40px 22px;
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  #landing.hide{opacity:0;transform:scale(.985);pointer-events:none;position:fixed;inset:0}
+
+  .brand{text-align:center}
+  .brand .eyebrow{
+    font-size:10px;font-weight:600;letter-spacing:.5em;text-indent:.5em;
+    color:var(--gold);text-transform:uppercase;margin-bottom:14px;
+  }
+  .brand h1{
+    font-size:clamp(30px,8vw,42px);font-weight:300;letter-spacing:.34em;text-indent:.34em;
+    text-transform:uppercase;color:#f4f1ec;
+  }
+  .brand .rule{
+    margin:22px auto 0;width:min(300px,70vw);height:1px;
+    background:linear-gradient(90deg,transparent,rgba(212,180,131,.55),transparent);
+  }
+
+  .choices{display:flex;flex-direction:column;gap:18px;width:100%;max-width:420px}
+  .choice{
+    position:relative;display:flex;align-items:center;gap:18px;
+    width:100%;padding:26px 26px;
+    background:linear-gradient(170deg, rgba(34,35,40,.92), rgba(16,17,20,.94));
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:26px;
+    color:var(--text);text-align:left;cursor:pointer;
+    transition:transform .18s ease, border-color .25s ease, box-shadow .25s ease;
+    box-shadow:0 18px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
+    font-family:inherit;
+  }
+  .choice:active{transform:scale(.97)}
+  .choice .c-icon{
+    width:46px;height:46px;flex:0 0 auto;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .choice .c-icon svg{width:24px;height:24px}
+  .choice .c-text{flex:1 1 auto;min-width:0}
+  .choice .c-name{
+    font-size:24px;font-weight:300;letter-spacing:.24em;text-transform:uppercase;line-height:1.1;
+  }
+  .choice .c-sub{margin-top:7px;font-size:12px;font-weight:500;color:var(--text-3);letter-spacing:.04em}
+  .choice .c-go{flex:0 0 auto;color:var(--text-3);font-size:22px;font-weight:300}
+
+  .choice.mariale .c-icon{background:rgba(255,179,64,.12);color:var(--amber);box-shadow:0 0 26px rgba(255,179,64,.14)}
+  .choice.mariale:active,.choice.mariale:hover{border-color:rgba(255,179,64,.4)}
+  .choice.felix .c-icon{background:rgba(48,209,88,.12);color:var(--green);box-shadow:0 0 26px rgba(48,209,88,.14)}
+  .choice.felix:active,.choice.felix:hover{border-color:rgba(48,209,88,.4)}
+  .choice.where .c-icon{background:rgba(100,210,255,.12);color:var(--blue);box-shadow:0 0 26px rgba(100,210,255,.14)}
+  .choice.where:active,.choice.where:hover{border-color:rgba(100,210,255,.4)}
+  .choice.offline .c-icon{background:rgba(196,164,255,.12);color:#c4a4ff;box-shadow:0 0 26px rgba(196,164,255,.14)}
+  .choice.offline:active,.choice.offline:hover{border-color:rgba(196,164,255,.4)}
+
+  .landing-foot{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3)}
+
+  /* ================= DASHBOARD ================= */
+  #dash{
+    display:none;flex-direction:column;align-items:center;gap:14px;
+    padding:max(20px,env(safe-area-inset-top)) 16px 44px;
+    min-height:100vh;
+    opacity:0;transform:translateY(8px);
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  body.in-dash #dash{display:flex}
+  body.in-dash.shown #dash{opacity:1;transform:none}
+
+  .dash-head{
+    width:100%;max-width:960px;display:flex;align-items:center;gap:14px;padding:4px 2px;
+  }
+  .back{
+    width:38px;height:38px;flex:0 0 auto;border-radius:50%;
+    background:var(--card-2);border:none;color:var(--text-2);
+    font-size:20px;font-weight:400;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .15s ease;
+  }
+  .back:active{transform:scale(.92)}
+  .dash-title{
+    flex:1 1 auto;font-size:21px;font-weight:300;letter-spacing:.26em;text-transform:uppercase;
+  }
+  .refresh{
+    width:38px;height:38px;flex:0 0 auto;border-radius:50%;
+    background:var(--card-2);border:none;color:var(--text-2);cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;transition:transform .15s ease;
+  }
+  .refresh:active{transform:scale(.92)}
+  .refresh svg{width:18px;height:18px}
+  .refresh.spin svg{animation:spin .7s ease}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .dash-clock{font-size:14px;font-weight:500;color:var(--text-2);font-variant-numeric:tabular-nums}
+
+  .alert{
+    width:100%;max-width:960px;
+    background:rgba(255,69,58,.13);
+    border:1px solid rgba(255,69,58,.34);
+    border-radius:20px;padding:13px 18px;
+    font-size:14px;font-weight:500;line-height:1.5;color:#ffb3ad;
+  }
+  .alert b{color:var(--red);font-weight:700}
+
+  .grid{width:100%;max-width:960px;display:grid;grid-template-columns:1fr;gap:14px}
+  @media (min-width:860px){.grid{grid-template-columns:1fr 1fr}}
+  .group{display:none;grid-column:1 / -1}
+  body[data-view="mariale"] #g-mariale{display:contents}
+  body[data-view="felix"]   #g-felix{display:contents}
+
+  /* ---------- Where next? planner ---------- */
+  #where-panel{display:none;width:100%;max-width:680px;flex-direction:column;gap:14px}
+  body[data-view="where"] #where-panel{display:flex}
+  body[data-view="where"] .grid{display:none}
+
+  /* ---------- Offline emergency view ---------- */
+  #offline-panel{display:none;width:100%;max-width:680px;flex-direction:column;gap:14px}
+  body[data-view="offline"] #offline-panel{display:flex}
+  body[data-view="offline"] .grid{display:none}
+  .off-note{
+    background:rgba(196,164,255,.08);border:1px solid rgba(196,164,255,.2);border-radius:18px;
+    padding:13px 16px;font-size:12.5px;color:var(--text-2);line-height:1.55;
+  }
+  .off-steps{display:flex;flex-direction:column;gap:9px;border-top:.5px solid var(--sep);padding-top:12px;margin-top:6px}
+  .off-step{display:flex;gap:11px;align-items:baseline}
+  .off-step .n{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:rgba(196,164,255,.16);color:#cbb0ff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .off-step .s{flex:1 1 auto;font-size:13.5px;color:var(--text-2);line-height:1.45}
+  .off-step .s b{color:var(--text);font-weight:600}
+  .off-list{display:flex;flex-direction:column;gap:11px;margin-top:2px}
+  .off-row{display:flex;flex-direction:column;gap:3px}
+  .off-dest{font-size:15px;font-weight:600;color:var(--text)}
+  .off-how{font-size:13px;color:var(--text-2);line-height:1.45}
+  .off-how b{color:#cbb0ff;font-weight:600}
+  .of-head{font-size:14px;color:var(--text);margin:2px 2px 0;line-height:1.4}
+  .of-head b{font-weight:600}
+  .of-head .saved{color:var(--text-3);font-weight:400}
+  .where-form{display:flex;flex-direction:column;gap:12px}
+  .wf-field{display:flex;flex-direction:column;gap:6px}
+  .wf-label{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding-left:2px}
+  .wf-input{
+    width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;padding:13px 15px;color:var(--text);font-size:16px;font-family:inherit;outline:none;
+    transition:border-color .2s ease;
+  }
+  .wf-input:focus{border-color:rgba(100,210,255,.5)}
+  .wf-input::placeholder{color:var(--text-3)}
+  .wf-cap{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:4px 2px 0}
+  .wf-modes{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;
+    padding:8px 14px;border-radius:99px;color:var(--text-3);
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+    transition:all .18s ease;
+  }
+  .chip.on{color:#001016;background:var(--blue);border-color:var(--blue)}
+  .wf-time{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .seg{
+    font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;
+    padding:9px 16px;border-radius:12px;color:var(--text-2);
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    transition:all .18s ease;
+  }
+  .seg.on{color:#001016;background:var(--blue);border-color:var(--blue)}
+  .wf-timeinput{
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;
+    padding:9px 12px;color:var(--text);font-size:15px;font-family:inherit;outline:none;color-scheme:dark;
+  }
+  .wf-timeinput:disabled{opacity:.35}
+  .wf-go{
+    margin-top:4px;width:100%;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer;
+    padding:15px;border-radius:16px;border:none;color:#001016;
+    background:var(--blue);box-shadow:0 8px 26px rgba(100,210,255,.22);
+    transition:transform .15s ease,opacity .2s ease;
+  }
+  .wf-go:active{transform:scale(.98)}
+  .wf-go.loading{opacity:.6}
+  .where-hint{font-size:14px;color:var(--text-3);text-align:center;padding:18px 10px;line-height:1.5}
+  .wr-modes{font-size:12.5px;color:var(--text-3);letter-spacing:.01em;margin-top:3px}
+
+  /* autocomplete */
+  .wf-ac{position:relative}
+  .wf-suggest{
+    position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:30;
+    background:#16171b;border:1px solid rgba(255,255,255,.12);border-radius:14px;overflow:hidden auto;
+    box-shadow:0 18px 44px rgba(0,0,0,.6);max-height:300px;
+  }
+  .sg-item{padding:11px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+  .sg-item + .sg-item{border-top:.5px solid rgba(255,255,255,.06)}
+  .sg-item:active,.sg-item.active{background:rgba(100,210,255,.14)}
+  .sg-name{font-size:15px;font-weight:500;color:var(--text)}
+  .sg-sub{font-size:11.5px;color:var(--text-3);letter-spacing:.02em}
+
+  /* detailed result cards */
+  #where-results{display:flex;flex-direction:column;gap:14px}
+  .wr-section{display:flex;flex-direction:column;gap:10px}
+  .wr-label{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);padding:2px 4px}
+  .wr-box{display:flex;flex-direction:column;gap:10px;background:rgba(100,210,255,.06);border:1px solid rgba(100,210,255,.18);border-radius:22px;padding:12px}
+  .wr-list{display:flex;flex-direction:column;gap:10px}
+  .wr-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:15px 16px 13px}
+  .wr-top{display:flex;align-items:center;gap:10px}
+  .wr-time{flex:1 1 auto;font-size:17px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .wr-dur{font-size:13px;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .wr-meta{margin-top:6px;font-size:12px;color:var(--text-3);letter-spacing:.01em}
+  .wr-legs{margin-top:11px;display:flex;flex-direction:column;gap:8px;border-top:.5px solid var(--sep);padding-top:11px}
+  .lg{display:flex;gap:10px;align-items:baseline}
+  .lg-mode{flex:0 0 auto;min-width:84px;font-size:12px;font-weight:600;color:var(--blue)}
+  .lg-mode.walk{color:var(--text-3)}
+  .lg-mode.bus{color:#f5a3c7}
+  .lg-txt{flex:1 1 auto;font-size:13px;color:var(--text-2);line-height:1.4}
+
+  /* area explorer (assistance bar) */
+  .assist{display:flex;flex-direction:column;gap:10px}
+  .ax-results{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto}
+  .ax-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 12px}
+  .ax-info{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .ax-name{font-size:15px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ax-type{font-size:11.5px;color:var(--text-3)}
+  .ax-btns{flex:0 0 auto;display:flex;gap:6px}
+  .ax-btns button{font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;color:var(--blue);background:rgba(100,210,255,.12);border:1px solid rgba(100,210,255,.3);border-radius:99px;padding:6px 12px;transition:transform .15s ease}
+  .ax-btns button:active{transform:scale(.95)}
+
+  .card{
+    background:linear-gradient(170deg, rgba(32,33,38,.92), rgba(17,18,21,.94));
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:26px;
+    padding:20px 22px 17px;
+    box-shadow:0 16px 44px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .card-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .via{font-size:11.5px;color:var(--text-3);letter-spacing:.02em;margin:-2px 0 8px 33px}
+  .icon{width:21px;height:21px;flex:0 0 auto;color:var(--text-2)}
+  .route{font-size:16px;font-weight:600;letter-spacing:-.01em;flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .route .arrow{color:var(--text-3);font-weight:400;padding:0 3px}
+  .mode{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:var(--text-2);background:rgba(255,255,255,.07);padding:5px 12px;border-radius:99px;flex:0 0 auto}
+
+  .rows{display:flex;flex-direction:column}
+  .row{display:flex;align-items:center;gap:11px;padding:11px 0}
+  .row + .row{border-top:.5px solid var(--sep)}
+  .row .dest{flex:1 1 auto;font-size:16.5px;font-weight:500;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .badge{
+    flex:0 0 auto;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;
+    padding:5px 12px;border-radius:99px;min-width:62px;text-align:center;
+  }
+  .badge.ok  {color:var(--green);background:rgba(48,209,88,.13)}
+  .badge.soon{color:var(--amber);background:rgba(255,179,64,.14)}
+  .badge.due {color:#fff;background:var(--red);animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{50%{opacity:.55}}
+  @media (prefers-reduced-motion:reduce){.badge.due{animation:none}}
+
+  .catch{
+    flex:0 0 auto;min-width:72px;text-align:center;
+    font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;
+    padding:5px 9px;border-radius:99px;
+  }
+  .catch.make {color:var(--green);background:rgba(48,209,88,.13)}
+  .catch.tight{color:var(--amber);background:rgba(255,179,64,.14)}
+  .catch.miss {color:var(--red);background:rgba(255,69,58,.13)}
+
+  .empty{padding:20px 0 10px;font-size:15px;color:var(--text-3);text-align:center}
+  .updated{margin-top:13px;font-size:11.5px;color:var(--text-3);letter-spacing:.02em}
+  .wx-rain{color:#6fb6ff;font-weight:600}
+  .wx-dry{color:var(--text-3)}
+
+  /* ---------- umbrella (groups sub-views under one mode) ---------- */
+  .umbrella{
+    grid-column:1 / -1;
+    background:linear-gradient(170deg, rgba(32,33,38,.92), rgba(15,16,19,.95));
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:30px;
+    padding:18px 16px 16px;
+    box-shadow:0 18px 50px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .umb-head{display:flex;align-items:center;gap:12px;padding:2px 6px 4px}
+  .umb-head .icon{width:22px;height:22px;color:var(--text)}
+  .umb-title{flex:1 1 auto;font-size:19px;font-weight:300;letter-spacing:.24em;text-transform:uppercase}
+  .subsection{
+    font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--text-3);padding:8px 6px 2px;
+  }
+  .subcard{
+    background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:20px;
+    padding:14px 16px 12px;
+  }
+  .sub-head{margin-bottom:6px}
+  .subcard .route{font-size:15px;font-weight:600}
+  .sub-line{font-size:11px;color:var(--text-3);letter-spacing:.02em;margin-top:3px}
+  .subcard .updated{margin-top:11px}
+  .dir + .dir{margin-top:4px}
+  .dir-cards{display:flex;flex-direction:column;gap:12px}
+  .dir-unavail{
+    display:flex;flex-direction:column;gap:5px;text-align:center;
+    background:rgba(255,69,58,.10);
+    border:1px solid rgba(255,69,58,.30);
+    border-radius:20px;padding:22px 18px;
+  }
+  .ru-title{font-size:16px;font-weight:600;color:#ff8077;letter-spacing:-.01em}
+  .ru-sub{font-size:12.5px;color:var(--text-3);line-height:1.5}
+
+  .footer{max-width:960px;font-size:10px;color:var(--text-3);text-align:center;line-height:1.8;padding:4px 8px 0;letter-spacing:.04em}
+  .errnote{display:none;max-width:960px;font-size:13px;color:var(--text-2);line-height:1.5;text-align:center}
+</style>
+</head>
+<body data-view="">
+
+<!-- SF-style line icons -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="ic-train" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="3" width="14" height="15" rx="3.5"/>
+      <path d="M5 11.5h14"/>
+      <circle cx="9" cy="15" r="1" fill="currentColor" stroke="none"/>
+      <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+      <path d="M8.5 18l-2 3M15.5 18l2 3"/>
+    </symbol>
+    <symbol id="ic-boat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 14h16l-1.7 3.6a2 2 0 0 1-1.8 1.1H7.5a2 2 0 0 1-1.8-1.1L4 14z"/>
+      <path d="M6.5 14V9.5a1.5 1.5 0 0 1 1.5-1.5h8a1.5 1.5 0 0 1 1.5 1.5V14"/>
+      <path d="M12 8V5.5h3"/>
+    </symbol>
+    <symbol id="ic-where" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1 5.1-2.1z"/>
+    </symbol>
+    <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 11a8 8 0 1 0-2.3 5.7"/>
+      <path d="M20 4v5h-5"/>
+    </symbol>
+    <symbol id="ic-offline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="6" cy="6.5" r="2.2"/>
+      <circle cx="18" cy="17.5" r="2.2"/>
+      <path d="M6 8.7v4a3 3 0 0 0 3 3h6.8"/>
+      <path d="M15.5 4.5h4.5M17.7 2.3v4.4"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ================= LANDING ================= -->
+<section id="landing">
+  <div class="brand">
+    <h1>Live Commute</h1>
+    <div class="rule"></div>
+  </div>
+
+  <div class="choices">
+    <button class="choice mariale" onclick="openView('mariale')">
+      <span class="c-icon"><svg><use href="#ic-boat"/></svg></span>
+      <span class="c-text">
+        <span class="c-name">Mariale</span>
+        <span class="c-sub">Greenwich ⇄ Battersea · Uber Boat</span>
+      </span>
+      <span class="c-go">›</span>
+    </button>
+
+    <button class="choice felix" onclick="openView('felix')">
+      <span class="c-icon"><svg><use href="#ic-train"/></svg></span>
+      <span class="c-text">
+        <span class="c-name">Felix</span>
+        <span class="c-sub">Greenwich ⇄ Canary Wharf · DLR</span>
+      </span>
+      <span class="c-go">›</span>
+    </button>
+
+    <button class="choice where" onclick="openWhere()">
+      <span class="c-icon"><svg><use href="#ic-where"/></svg></span>
+      <span class="c-text">
+        <span class="c-name">Where next?</span>
+        <span class="c-sub">Plan any journey across London</span>
+      </span>
+      <span class="c-go">›</span>
+    </button>
+
+    <button class="choice offline" onclick="openOffline()">
+      <span class="c-icon"><svg><use href="#ic-offline"/></svg></span>
+      <span class="c-text">
+        <span class="c-name">Offline</span>
+        <span class="c-sub">Emergency routes · works with no signal</span>
+      </span>
+      <span class="c-go">›</span>
+    </button>
+  </div>
+
+  <p class="landing-foot">Live · TfL Unified API</p>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<section id="dash">
+
+  <div class="dash-head">
+    <button class="back" onclick="closeView()" aria-label="Back">‹</button>
+    <span class="dash-title" id="dash-title">—</span>
+    <button class="refresh" id="refreshBtn" onclick="refreshView()" aria-label="Refresh"><svg><use href="#ic-refresh"/></svg></button>
+    <span class="dash-clock" id="clock">--:--</span>
+  </div>
+
+  <div class="alert" id="alert" hidden></div>
+
+  <div class="grid">
+
+    <div class="group" id="g-mariale">
+
+      <!-- BOAT umbrella -->
+      <div class="umbrella">
+        <div class="umb-head">
+          <svg class="icon"><use href="#ic-boat"/></svg>
+          <span class="umb-title">Boat</span>
+          <span class="mode">UBER BOAT</span>
+        </div>
+
+        <div class="subcard" id="b-boat-out">
+          <div class="sub-head">
+            <span class="route">Greenwich Pier <span class="arrow">→</span> Battersea</span>
+            <div class="sub-line">Westbound river bus</div>
+          </div>
+          <div class="rows"><div class="empty">Connecting…</div></div>
+          <p class="updated">—</p>
+        </div>
+
+        <div class="subcard" id="b-boat-ret">
+          <div class="sub-head">
+            <span class="route">Battersea <span class="arrow">→</span> Greenwich Pier</span>
+            <div class="sub-line">Eastbound river bus</div>
+          </div>
+          <div class="rows"><div class="empty">Connecting…</div></div>
+          <p class="updated">—</p>
+        </div>
+      </div>
+
+      <!-- RAIL + TUBE umbrella -->
+      <div class="umbrella umb-rail">
+        <div class="umb-head">
+          <svg class="icon"><use href="#ic-train"/></svg>
+          <span class="umb-title">Rail + Tube</span>
+          <span class="mode">VIA LONDON BRIDGE</span>
+        </div>
+
+        <div class="dir" id="dir-out">
+          <p class="subsection">Toward Battersea — 3 changes</p>
+          <div class="dir-cards">
+            <div class="subcard" id="leg-o1">
+              <div class="sub-head">
+                <span class="route">Greenwich <span class="arrow">→</span> London Bridge</span>
+                <div class="sub-line">1 · Southeastern · National Rail</div>
+              </div>
+              <div class="rows"><div class="empty">Connecting…</div></div>
+              <p class="updated">—</p>
+            </div>
+
+            <div class="subcard" id="leg-o2">
+              <div class="sub-head">
+                <span class="route">London Bridge <span class="arrow">→</span> Kennington</span>
+                <div class="sub-line">2 · Northern line · southbound</div>
+              </div>
+              <div class="rows"><div class="empty">Connecting…</div></div>
+              <p class="updated">—</p>
+            </div>
+
+            <div class="subcard" id="leg-o3">
+              <div class="sub-head">
+                <span class="route">Kennington <span class="arrow">→</span> Battersea</span>
+                <div class="sub-line">3 · Northern line · Battersea branch</div>
+              </div>
+              <div class="rows"><div class="empty">Connecting…</div></div>
+              <p class="updated">—</p>
+            </div>
+          </div>
+          <div class="dir-unavail" hidden>
+            <span class="ru-title">Route not available right now</span>
+            <span class="ru-sub">One or more of the 3 connections isn’t running — take the boat instead</span>
+          </div>
+        </div>
+
+        <div class="dir" id="dir-ret">
+          <p class="subsection">Toward Greenwich — 3 changes</p>
+          <div class="dir-cards">
+            <div class="subcard" id="leg-r1">
+              <div class="sub-head">
+                <span class="route">Battersea <span class="arrow">→</span> Kennington</span>
+                <div class="sub-line">1 · Northern line · northbound</div>
+              </div>
+              <div class="rows"><div class="empty">Connecting…</div></div>
+              <p class="updated">—</p>
+            </div>
+
+            <div class="subcard" id="leg-r2">
+              <div class="sub-head">
+                <span class="route">Kennington <span class="arrow">→</span> London Bridge</span>
+                <div class="sub-line">2 · Northern line · via Bank</div>
+              </div>
+              <div class="rows"><div class="empty">Connecting…</div></div>
+              <p class="updated">—</p>
+            </div>
+
+            <div class="subcard" id="leg-r3">
+              <div class="sub-head">
+                <span class="route">London Bridge <span class="arrow">→</span> Greenwich</span>
+                <div class="sub-line">3 · Southeastern · National Rail</div>
+              </div>
+              <div class="rows"><div class="empty">Connecting…</div></div>
+              <p class="updated">—</p>
+            </div>
+          </div>
+          <div class="dir-unavail" hidden>
+            <span class="ru-title">Route not available right now</span>
+            <span class="ru-sub">One or more of the 3 connections isn’t running — take the boat instead</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="group" id="g-felix">
+      <div class="card" id="b-dlr-out">
+        <div class="card-head">
+          <svg class="icon"><use href="#ic-train"/></svg>
+          <span class="route">Greenwich <span class="arrow">→</span> Canary Wharf</span>
+          <span class="mode">DLR</span>
+        </div>
+        <div class="rows"><div class="empty">Connecting…</div></div>
+        <p class="updated">—</p>
+      </div>
+
+      <div class="card" id="b-dlr-ret">
+        <div class="card-head">
+          <svg class="icon"><use href="#ic-train"/></svg>
+          <span class="route">Canary Wharf <span class="arrow">→</span> Greenwich</span>
+          <span class="mode">DLR</span>
+        </div>
+        <div class="rows"><div class="empty">Connecting…</div></div>
+        <p class="updated">—</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ WHERE NEXT (custom planner) ============ -->
+  <div id="where-panel">
+
+    <div class="card assist">
+      <p class="wf-cap">Explore stops in an area</p>
+      <div class="wf-ac">
+        <input id="ax-q" class="wf-input" type="text" placeholder="e.g. Notting Hill, King’s Cross, SE10" autocomplete="off" autocapitalize="words">
+      </div>
+      <div id="ax-results" class="ax-results"></div>
+    </div>
+
+    <div class="card where-form">
+      <div class="wf-field">
+        <label class="wf-label">From</label>
+        <div class="wf-ac">
+          <input id="wf-from" class="wf-input" type="text" placeholder="Station, place or postcode" autocomplete="off" autocapitalize="words" enterkeyhint="search">
+          <div class="wf-suggest" id="sg-from" hidden></div>
+        </div>
+      </div>
+      <div class="wf-field">
+        <label class="wf-label">To</label>
+        <div class="wf-ac">
+          <input id="wf-to" class="wf-input" type="text" placeholder="Station, place or postcode" autocomplete="off" autocapitalize="words" enterkeyhint="search">
+          <div class="wf-suggest" id="sg-to" hidden></div>
+        </div>
+      </div>
+
+      <p class="wf-cap">Transport</p>
+      <div class="wf-modes" id="wf-modes">
+        <button type="button" class="chip on" data-mode="tube">Tube</button>
+        <button type="button" class="chip on" data-mode="bus">Bus</button>
+        <button type="button" class="chip on" data-mode="dlr">DLR</button>
+        <button type="button" class="chip on" data-mode="overground">Overground</button>
+        <button type="button" class="chip on" data-mode="elizabeth-line">Elizabeth</button>
+        <button type="button" class="chip on" data-mode="national-rail">Rail</button>
+        <button type="button" class="chip on" data-mode="river-bus">Boat</button>
+      </div>
+
+      <p class="wf-cap">Departure</p>
+      <div class="wf-time">
+        <button type="button" class="seg on" data-when="now">Leave now</button>
+        <button type="button" class="seg" data-when="at">Leave at</button>
+        <input id="wf-time" class="wf-timeinput" type="time" disabled>
+      </div>
+
+      <button type="button" class="wf-go" id="wf-go">Find routes</button>
+    </div>
+
+    <div id="where-results">
+      <p class="where-hint">Enter where you’re starting and where you’re going.</p>
+    </div>
+  </div>
+
+  <!-- ============ OFFLINE emergency routes (fully static) ============ -->
+  <div id="offline-panel">
+    <p class="off-note">Works with no signal. General directions only — which lines and where to change, no live times or disruptions. Routes you look up while online are saved here for offline.</p>
+
+    <div class="card">
+      <p class="wf-cap">Find any route across London</p>
+      <div class="wf-field"><label class="wf-label">From</label><input id="of-from" class="wf-input" type="text" placeholder="Station, place or postcode" autocomplete="off" autocapitalize="words" enterkeyhint="search"></div>
+      <div class="wf-field"><label class="wf-label">To</label><input id="of-to" class="wf-input" type="text" placeholder="Station, place or postcode" autocomplete="off" autocapitalize="words" enterkeyhint="search"></div>
+      <button type="button" class="wf-go" id="of-go">Find route</button>
+      <div id="of-results"></div>
+    </div>
+
+    <p class="section">Daily commutes</p>
+
+    <div class="card">
+      <div class="card-head"><svg class="icon"><use href="#ic-train"/></svg><span class="route">Greenwich ⇄ Canary Wharf</span><span class="mode">DLR</span></div>
+      <div class="off-steps">
+        <div class="off-step"><span class="n">→</span><span class="s"><b>To Canary Wharf:</b> board DLR at <b>Greenwich</b>, direction <b>Bank / Stratford</b> (northbound). Ride Cutty Sark → Island Gardens → <b>Canary Wharf</b>.</span></div>
+        <div class="off-step"><span class="n">←</span><span class="s"><b>Back to Greenwich:</b> board DLR at <b>Heron Quays</b> or Canary Wharf, direction <b>Lewisham</b> (southbound). Get off at <b>Greenwich</b>.</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><svg class="icon"><use href="#ic-boat"/></svg><span class="route">Greenwich ⇄ Battersea</span><span class="mode">UBER BOAT</span></div>
+      <div class="off-steps">
+        <div class="off-step"><span class="n">→</span><span class="s"><b>To Battersea:</b> from <b>Greenwich Pier</b>, board <b>Uber Boat RB1 westbound</b> (toward Putney). Stay on to <b>Battersea Power Station Pier</b>.</span></div>
+        <div class="off-step"><span class="n">←</span><span class="s"><b>Back to Greenwich:</b> from <b>Battersea Power Station Pier</b>, board <b>RB1 eastbound</b> (toward Woolwich/Barking). Get off at <b>Greenwich Pier</b>.</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><svg class="icon"><use href="#ic-train"/></svg><span class="route">Greenwich ⇄ Battersea</span><span class="mode">RAIL + TUBE</span></div>
+      <div class="off-steps">
+        <div class="off-step"><span class="n">1</span><span class="s"><b>Greenwich</b> (National Rail) → toward <b>Cannon St / Charing Cross</b>; get off <b>London Bridge</b>.</span></div>
+        <div class="off-step"><span class="n">2</span><span class="s">Change to <b>Northern line southbound</b> (Bank branch); get off <b>Kennington</b>.</span></div>
+        <div class="off-step"><span class="n">3</span><span class="s">Change to <b>Northern line · Battersea branch</b>; get off <b>Battersea Power Station</b>.</span></div>
+        <div class="off-step"><span class="n">←</span><span class="s"><b>Reverse:</b> Battersea Power Station → Northern to <b>Kennington</b> → Northern <b>via Bank</b> to <b>London Bridge</b> → National Rail to <b>Greenwich</b>.</span></div>
+      </div>
+    </div>
+
+    <p class="section">Getting around from Greenwich</p>
+
+    <div class="card">
+      <div class="off-list">
+        <div class="off-row"><span class="off-dest">Bank / City</span><span class="off-how"><b>DLR</b> from Greenwich, direction Bank, to the terminus (Bank).</span></div>
+        <div class="off-row"><span class="off-dest">London Bridge</span><span class="off-how"><b>National Rail</b> from Greenwich toward Cannon St / Charing Cross; off at London Bridge.</span></div>
+        <div class="off-row"><span class="off-dest">Lewisham</span><span class="off-how"><b>DLR</b> from Greenwich, direction Lewisham (southbound), to the terminus.</span></div>
+        <div class="off-row"><span class="off-dest">Stratford</span><span class="off-how"><b>DLR</b> from Greenwich, direction Stratford (northbound).</span></div>
+        <div class="off-row"><span class="off-dest">West End / Westminster</span><span class="off-how"><b>National Rail</b> to London Bridge → <b>Jubilee line</b> (toward Stanmore) to Westminster / Bond Street.</span></div>
+        <div class="off-row"><span class="off-dest">The O2 / North Greenwich</span><span class="off-how"><b>DLR</b> to Canary Wharf → <b>Jubilee line</b> one stop (toward Stratford) to North Greenwich.</span></div>
+        <div class="off-row"><span class="off-dest">Heathrow Airport</span><span class="off-how"><b>DLR</b> to Canary Wharf → <b>Elizabeth line</b> westbound toward Heathrow (check front of train).</span></div>
+        <div class="off-row"><span class="off-dest">King’s Cross / Euston</span><span class="off-how"><b>DLR</b> to Bank → <b>Northern line</b> (Bank branch, northbound) to King’s Cross / Euston.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="errnote" id="errnote">
+    Could not reach the live feed from this window. If you are viewing this inside a chat preview,
+    download the file and open it in your browser — it connects directly to the TfL API and runs continuously.
+  </p>
+
+  <p class="footer">
+    Live data: TfL Unified API · refreshed every 30 s · countdowns tick every second · London time · build 13Jun-l
+  </p>
+
+</section>
+
+<script>
+const API = "https://api.tfl.gov.uk/StopPoint";
+const APP_KEY = "";
+const POLL_MS = 30000;
+
+const EASTBOUND = /barking|woolwich|royal wharf|north greenwich|greenwich/i;
+const isRiverBus = a => a.modeName === "river-bus" || /^rb/i.test(a.lineId||"");
+const destOf = a => (a.destinationName||"") + " " + (a.towards||"");
+
+// walk = estimated minutes on foot from the fixed origin to the boarding point
+// wx = index into WX_PLACES (forecast at the walking origin)
+const BOARDS = [
+  { el:"b-dlr-out",  kind:"dlr",  stop:"940GZZDLGRE", walk:12, origin:"Point Hill", wx:0,
+    filter:a => !/lewisham/i.test(destOf(a)) },
+  { el:"b-boat-out", kind:"pier", stop:"930GGNW",     walk:18, origin:"Point Hill", wx:0,
+    filter:a => isRiverBus(a) && !EASTBOUND.test(destOf(a)) },
+  { el:"b-boat-ret", kind:"pier", stop:"930GBSP",     walk:8,  origin:"Battersea offices", wx:1,
+    filter:a => isRiverBus(a) && EASTBOUND.test(destOf(a)) },
+  { el:"b-dlr-ret",  kind:"dlr",  stop:"940GZZDLHEQ", walk:5,  origin:"Citigroup", wx:2,
+    filter:a => /lewisham|greenwich/i.test(destOf(a)) },
+];
+BOARDS.forEach(b => { b.data = []; b.lastOk = null; });
+
+const fmtHM = new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/London"});
+
+function keyParam(){ return APP_KEY ? `?app_key=${APP_KEY}` : ""; }
+
+/* ---------- view switching ---------- */
+function showDash(title){
+  document.getElementById("dash-title").textContent = title;
+  document.getElementById("landing").classList.add("hide");
+  document.body.classList.add("in-dash");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add("shown")));
+  window.scrollTo(0,0);
+}
+function openView(name){
+  document.body.dataset.view = name;
+  showDash(name === "mariale" ? "Mariale" : "Felix");
+  renderAlert();
+  pollBoards(); pollStatus(); pollLegs();
+}
+function openWhere(){
+  document.body.dataset.view = "where";
+  showDash("Where next?");
+  renderAlert();
+}
+function openOffline(){
+  document.body.dataset.view = "offline";
+  showDash("Offline");
+  renderAlert();
+  window.scrollTo(0,0);
+}
+function closeView(){
+  document.body.classList.remove("shown","in-dash");
+  document.getElementById("landing").classList.remove("hide");
+  document.body.dataset.view = "";
+  window.scrollTo(0,0);
+}
+
+/* ---------- live departures ---------- */
+async function pollBoards(){
+  await Promise.all(BOARDS.map(async b => {
+    try{
+      const res = await fetch(`${API}/${b.stop}/Arrivals${keyParam()}`, {cache:"no-store"});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      b.data = (await res.json()).filter(b.filter);
+      b.lastOk = Date.now();
+    }catch(e){ console.error(b.el, e); }
+  }));
+  const allStale = BOARDS.every(b => !b.lastOk || Date.now()-b.lastOk > 120000);
+  document.getElementById("errnote").style.display = allStale ? "block" : "none";
+  render();
+}
+
+function cleanDest(name){
+  return (name||"")
+    .replace(/ DLR Station$/i,"").replace(/ \(.*?\)/g,"")
+    .replace(/ Pier$/i,"").replace(/Power Station/i,"Power Stn").trim();
+}
+
+function etaBadge(secs){
+  if(secs <= 60)  return `<span class="badge due">Due</span>`;   // red — board now
+  const m = Math.round(secs/60);
+  const cls = secs < 300 ? "soon" : "ok";                        // amber under 5 min, green at 5+
+  return `<span class="badge ${cls}">${m} min</span>`;
+}
+
+// Can you walk from the origin and still board it?
+// green = shows the time you must leave by · amber = leave right now · red = unreachable on foot
+function catchBadge(secs, walkMins, arrivalMs){
+  const margin = secs - walkMins*60;
+  if(margin >= 120){
+    const leaveBy = fmtHM.format(new Date(arrivalMs - walkMins*60000));
+    return `<span class="catch make">✓ ${leaveBy}</span>`;
+  }
+  if(margin >= 0) return `<span class="catch tight">Tight</span>`;
+  return `<span class="catch miss">✗</span>`;
+}
+
+function rowsHTML(b){
+  const upcoming = b.data
+    .map(a => ({...a, t:new Date(a.expectedArrival).getTime()}))
+    .filter(a => a.t - Date.now() > -20000)
+    .sort((x,y) => x.t - y.t)
+    .slice(0,5);
+  if(upcoming.length === 0){
+    return `<div class="empty">No ${b.kind==="dlr"?"trains":"departures"} right now</div>`;
+  }
+  return upcoming.map(a => {
+    const secs = Math.round((a.t - Date.now())/1000);
+    return `<div class="row">
+      <span class="dest">${cleanDest(a.destinationName || a.towards || "Check front of train")}</span>
+      ${etaBadge(secs)}
+      ${catchBadge(secs, b.walk, a.t)}
+    </div>`;
+  }).join("");
+}
+
+function render(){
+  BOARDS.forEach(b => {
+    const root = document.getElementById(b.el);
+    root.querySelector(".rows").innerHTML = rowsHTML(b);
+    const rain = rainByLoc[b.wx];
+    const rainTxt = rain === true  ? ` · <span class="wx-rain">☔ Rain on the walk</span>`
+                  : rain === false ? ` · <span class="wx-dry">Dry next 45 min</span>`
+                  : "";
+    root.querySelector(".updated").innerHTML =
+      (b.lastOk ? `Updated ${fmtHM.format(new Date(b.lastOk))}` : "Waiting for live data…")
+      + ` · Walk ~${b.walk} min from ${b.origin}` + rainTxt;
+  });
+}
+
+/* ---------- rain on the walk (Open-Meteo, 15-min forecast) ---------- */
+// Forecast at each walking origin. Robust: one simple call per place,
+// unix timestamps (timezone-proof), visible only when data is healthy.
+const WX_PLACES = [
+  { lat:51.4767, lon:-0.0079 },  // 0 · Point Hill SE10
+  { lat:51.4818, lon:-0.1444 },  // 1 · Battersea Power Station
+  { lat:51.5033, lon:-0.0215 },  // 2 · Citigroup / Heron Quays
+];
+let rainByLoc = [null, null, null];
+const RAIN_POLL_MS = 900000; // 15 min
+
+const rainUrl = p => "https://api.open-meteo.com/v1/forecast"
+  + `?latitude=${p.lat}&longitude=${p.lon}`
+  + "&minutely_15=precipitation&forecast_days=1&timeformat=unixtime";
+
+async function pollRain(){
+  rainByLoc = await Promise.all(WX_PLACES.map(async p => {
+    try{
+      const res = await fetch(rainUrl(p), {cache:"no-store"});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const j = await res.json();
+      const times = j?.minutely_15?.time, prec = j?.minutely_15?.precipitation;
+      if(!times || !prec) throw new Error("no minutely data");
+      const now = Date.now()/1000, horizon = now + 45*60;
+      let total = 0, found = false;
+      for(let i = 0; i < times.length; i++){
+        if(times[i] + 900 > now && times[i] < horizon){   // 15-min blocks overlapping the next 45 min
+          total += prec[i] ?? 0; found = true;
+        }
+      }
+      if(!found) throw new Error("no steps in window");
+      return total > 0.05;   // true = rain expected, false = dry
+    }catch(e){ console.error("rain", e); return null; }
+  }));
+  render();
+  if(rainByLoc.some(r => r === null)){
+    clearTimeout(pollRain._retry);
+    pollRain._retry = setTimeout(pollRain, 60000);  // quick retry on failure
+  }
+}
+
+/* ---------- service alerts, shown only where relevant per view ---------- */
+// Mariale uses boat + Northern line (her rail-leg closures surface via the
+// route-unavailable panel). Felix uses the DLR. Each view sees only its own lines.
+const STATUS_URL = "https://api.tfl.gov.uk/Line/dlr,northern,rb1,rb2,rb6/Status";
+const STATUS_POLL_MS = 30000;
+const ALERT_LINES = { felix:["dlr"], mariale:["northern","rb1","rb2","rb6"] };
+let disruptions = [];   // {lineId, name, desc, reason}
+
+async function pollStatus(){
+  try{
+    const res = await fetch(STATUS_URL + keyParam(), {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const lines = await res.json();
+    const found = [];
+    lines.forEach(l => (l.lineStatuses||[]).forEach(s => {
+      if(s.statusSeverity !== 10){  // 10 = Good Service
+        found.push({ lineId:(l.id||"").toLowerCase(), name:l.name, desc:s.statusSeverityDescription, reason:s.reason });
+      }
+    }));
+    disruptions = found;
+  }catch(e){ console.error("status", e); }
+  renderAlert();
+}
+
+function renderAlert(){
+  const el = document.getElementById("alert");
+  const rel = ALERT_LINES[document.body.dataset.view];
+  if(!rel){ el.hidden = true; return; }          // landing / where: no fixed-line banner
+  const items = disruptions.filter(d => rel.includes(d.lineId));
+  if(items.length){
+    el.innerHTML = items.map(d => `<b>${d.name}:</b> ${d.desc}${d.reason ? " — " + d.reason : ""}`).join("<br>");
+    el.hidden = false;
+  } else el.hidden = true;
+}
+
+/* ---------- which lines are effectively NOT running (for the planner) ---------- */
+const PLANNER_STATUS_URL = "https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,elizabeth-line,river-bus/Status";
+const DOWN_SEV = new Set([1, 2, 4, 16, 20]);   // closed · suspended · planned closure · not running · service closed
+let disruptedLines = new Set();
+
+async function pollPlannerStatus(){
+  try{
+    const res = await fetch(PLANNER_STATUS_URL + keyParam(), {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const lines = await res.json();
+    const s = new Set();
+    lines.forEach(l => (l.lineStatuses||[]).forEach(st => {
+      if(DOWN_SEV.has(st.statusSeverity)) s.add((l.id||"").toLowerCase());
+    }));
+    disruptedLines = s;
+  }catch(e){ console.error("planner status", e); }
+  if(whereSearched) renderWhere();
+}
+
+function journeyUsesDisruptedLine(j){
+  if(!disruptedLines.size) return false;
+  return (j.legs||[]).some(L => {
+    const id = (L.routeOptions?.[0]?.lineIdentifier?.id || "").toLowerCase();
+    return id && disruptedLines.has(id);
+  });
+}
+
+/* ---------- rail + tube, leg by leg (TfL Journey Planner per segment) ---------- */
+// One planner query per leg, so each interchange shows its own next 3-5 trains.
+// Coordinates (not station IDs) so TfL always resolves the stop.
+// expectMode/expectLine + the directDepartures filter keep ONLY genuine direct
+// trains for this exact path — no via-Lewisham substitutes, no extra interchanges.
+// first:true marks the leg you walk to from home/office — it gets the catch badge.
+const LEGS = [
+  // ---- toward Battersea (dir-out) ----
+  { el:"leg-o1", dir:"dir-out", from:"51.4781,-0.0149", to:"51.5052,-0.0864", modes:"national-rail", expectMode:"national-rail",
+    first:true, walk:12, origin:"Point Hill", wx:0 },
+  { el:"leg-o2", dir:"dir-out", from:"51.5052,-0.0864", to:"51.4884,-0.1056", modes:"tube", expectMode:"tube", expectLine:"northern" },
+  { el:"leg-o3", dir:"dir-out", from:"51.4884,-0.1056", to:"51.4815,-0.1440", modes:"tube", expectMode:"tube", expectLine:"northern" },
+  // ---- toward Greenwich (dir-ret) ----
+  { el:"leg-r1", dir:"dir-ret", from:"51.4815,-0.1440", to:"51.4884,-0.1056", modes:"tube", expectMode:"tube", expectLine:"northern",
+    first:true, walk:7, origin:"Battersea offices", wx:1 },
+  { el:"leg-r2", dir:"dir-ret", from:"51.4884,-0.1056", to:"51.5052,-0.0864", modes:"tube", expectMode:"tube", expectLine:"northern" },
+  { el:"leg-r3", dir:"dir-ret", from:"51.5052,-0.0864", to:"51.4781,-0.0149", modes:"national-rail", expectMode:"national-rail" },
+];
+LEGS.forEach(l => { l.journeys = []; l.lastOk = null; l.deps = []; });
+const DIRS = ["dir-out", "dir-ret"];
+const LEG_POLL_MS = 60000;
+
+const legUrl = l =>
+  `https://api.tfl.gov.uk/Journey/JourneyResults/${l.from}/to/${l.to}`
+  + `?mode=${l.modes}&timeIs=Departing`
+  + (APP_KEY ? "&app_key="+APP_KEY : "");
+
+// A valid departure = a single direct vehicle leg on the right mode/line.
+// Journeys that need an interchange (e.g. via Lewisham) have >1 vehicle leg → rejected.
+function directDepartures(l){
+  const out = [];
+  for(const j of l.journeys){
+    const vlegs = (j.legs || []).filter(L => L?.mode?.id && L.mode.id !== "walking");
+    if(vlegs.length !== 1) continue;                       // must be direct, no changes
+    const vl = vlegs[0];
+    if(vl.mode.id !== l.expectMode) continue;              // right transport mode
+    if(l.expectLine){
+      const line = (vl.routeOptions?.[0]?.lineIdentifier?.id || "").toLowerCase();
+      if(line !== l.expectLine) continue;                  // right line (Northern)
+    }
+    out.push({ dep:new Date(j.startDateTime).getTime(), arr:new Date(j.arrivalDateTime).getTime(), dur:j.duration });
+  }
+  return out
+    .filter(x => x.dep - Date.now() > -30000)
+    .sort((a,b) => a.dep - b.dep)
+    .slice(0,5);
+}
+
+async function pollLegs(){
+  await Promise.all(LEGS.map(async l => {
+    try{
+      const res = await fetch(legUrl(l), {cache:"no-store"});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const j = await res.json();
+      l.journeys = (j.journeys || []).filter(x => x.startDateTime && x.arrivalDateTime);
+      l.lastOk = Date.now();
+    }catch(e){ console.error(l.el, e); }
+  }));
+  renderLegs();
+}
+
+function renderLegs(){
+  // 1) recompute valid direct departures for every leg
+  LEGS.forEach(l => { l.deps = directDepartures(l); });
+
+  // 2) all-or-nothing per direction: the commute needs all 3 connections running
+  DIRS.forEach(dirId => {
+    const legs = LEGS.filter(l => l.dir === dirId);
+    const allLoaded   = legs.every(l => l.lastOk);
+    const allRunning  = legs.every(l => l.deps.length > 0);
+    const dirEl = document.getElementById(dirId);
+    const cardsEl   = dirEl.querySelector(".dir-cards");
+    const unavailEl = dirEl.querySelector(".dir-unavail");
+
+    if(allLoaded && !allRunning){
+      cardsEl.style.display = "none";
+      unavailEl.hidden = false;
+    } else {
+      cardsEl.style.display = "";
+      unavailEl.hidden = true;
+    }
+  });
+
+  // 3) render each leg's rows
+  LEGS.forEach(l => {
+    const root = document.getElementById(l.el);
+    if(!root) return;
+    const up = l.deps;
+
+    let html;
+    if(up.length === 0){
+      html = l.lastOk ? `<div class="empty">No direct trains right now</div>` : `<div class="empty">Connecting…</div>`;
+    } else {
+      html = up.map(x => {
+        const secs = Math.round((x.dep - Date.now())/1000);
+        const catchB = l.first ? catchBadge(secs, l.walk, x.dep) : "";
+        return `<div class="row">
+          <span class="dest">${fmtHM.format(new Date(x.dep))} → ${fmtHM.format(new Date(x.arr))} · ${x.dur}m</span>
+          ${etaBadge(secs)}
+          ${catchB}
+        </div>`;
+      }).join("");
+    }
+    root.querySelector(".rows").innerHTML = html;
+
+    let foot = l.lastOk ? `Updated ${fmtHM.format(new Date(l.lastOk))}` : "Waiting for live data…";
+    if(l.first){
+      foot += ` · Walk ~${l.walk} min from ${l.origin}`;
+      const rain = rainByLoc[l.wx];
+      if(rain === true)       foot += ` · <span class="wx-rain">☔ Rain on the walk</span>`;
+      else if(rain === false) foot += ` · <span class="wx-dry">Dry next 45 min</span>`;
+    }
+    root.querySelector(".updated").innerHTML = foot;
+  });
+}
+
+/* ---------- Where next? — custom live journey planner ---------- */
+const MODE_LABEL = {
+  tube:"Tube", bus:"Bus", dlr:"DLR", overground:"Overground",
+  "elizabeth-line":"Elizabeth line", "national-rail":"Rail", "river-bus":"Boat",
+  tram:"Tram", walking:"Walk", coach:"Coach", "cable-car":"Cable car"
+};
+let whereJourneys = [], whereWhen = "now", whereSearched = false, whereBusy = false;
+let whereFromId = null, whereToId = null;   // Naptan ids when a suggestion is chosen
+
+const cleanStop = n => (n||"")
+  .replace(/ (Underground|DLR|Rail|Overground) Station$/i,"")
+  .replace(/ Station$/i,"").replace(/ Rail$/i,"").replace(/ Pier$/i,"").trim();
+
+function modesHint(m){
+  const list = (m||[]).filter(x => x !== "walking").map(x => MODE_LABEL[x] || x);
+  return list.length ? list.join(" · ") : "Stop";
+}
+
+function selectedModes(){
+  return [...document.querySelectorAll("#wf-modes .chip.on")].map(c => c.dataset.mode);
+}
+
+// Resolve free-text From/To (handles TfL disambiguation by taking the top match).
+async function planJourney(fromRaw, toRaw, modes, timeQS, pref){
+  const base = (f,t) => `https://api.tfl.gov.uk/Journey/JourneyResults/${encodeURIComponent(f)}/to/${encodeURIComponent(t)}`;
+  const qs = `?mode=${modes}${timeQS}${pref ? "&journeyPreference="+pref : ""}${APP_KEY ? "&app_key="+APP_KEY : ""}`;
+  const hit = async (f,t) => {
+    const res = await fetch(base(f,t)+qs, {cache:"no-store"});
+    return res.json().catch(()=> ({}));
+  };
+  let data = await hit(fromRaw, toRaw);
+  if(!data.journeys){   // disambiguation — pick the first suggested match for each end
+    const fOpt = data.fromLocationDisambiguation?.disambiguationOptions?.[0]?.parameterValue;
+    const tOpt = data.toLocationDisambiguation?.disambiguationOptions?.[0]?.parameterValue;
+    if(fOpt || tOpt) data = await hit(fOpt || fromRaw, tOpt || toRaw);
+  }
+  return data.journeys || [];
+}
+
+// Resolve typed text to precise coordinates (most reliable for the planner).
+// Coordinates always resolve cleanly — no disambiguation, no wrong-station guesses.
+async function resolvePlace(text, chosen){
+  if(chosen) return chosen;   // already "lat,lon" from a picked suggestion
+  try{
+    const url = `https://api.tfl.gov.uk/StopPoint/Search/${encodeURIComponent(text)}?maxResults=8`
+      + (APP_KEY ? `&app_key=${APP_KEY}` : "");
+    const res = await fetch(url, {cache:"no-store"});
+    if(res.ok){
+      const data = await res.json();
+      const ms = (data.matches || []).filter(m => m.lat && m.lon);
+      if(ms.length){
+        const railish = ms.find(m => (m.modes||[]).some(x => ["tube","dlr","national-rail","overground","elizabeth-line"].includes(x)));
+        const pick = railish || ms[0];
+        return `${pick.lat},${pick.lon}`;
+      }
+    }
+  }catch(e){ /* fall through to raw text */ }
+  return text;
+}
+
+// Signature to dedupe identical journeys returned across preferences.
+function jSig(j){
+  const lines = (j.legs||[]).filter(L => L.mode?.id !== "walking")
+    .map(L => L.routeOptions?.[0]?.name || L.mode?.id).join(">");
+  return `${j.startDateTime}|${j.arrivalDateTime}|${lines}`;
+}
+
+function journeyModes(j){
+  const parts = (j.legs||[])
+    .filter(L => L?.mode?.id && L.mode.id !== "walking")
+    .map(L => L.routeOptions?.[0]?.name || MODE_LABEL[L.mode.id] || L.mode.id);
+  return parts.length ? parts.join("  ·  ") : "Walk";
+}
+
+async function runWhereSearch(silent){
+  const from = document.getElementById("wf-from").value.trim();
+  const to   = document.getElementById("wf-to").value.trim();
+  const results = document.getElementById("where-results");
+  if(!from || !to){
+    results.innerHTML = `<p class="where-hint">Enter both a start and a destination.</p>`;
+    return;
+  }
+  const modes = selectedModes();
+  if(!modes.length){
+    results.innerHTML = `<p class="where-hint">Pick at least one transport type.</p>`;
+    return;
+  }
+
+  const goBtn = document.getElementById("wf-go");
+  if(!silent){ goBtn.classList.add("loading"); goBtn.textContent = "Searching…"; results.innerHTML = `<p class="where-hint">Finding live routes…</p>`; }
+  whereBusy = true;
+  try{
+    const m = modes.join(",");
+    const [fromParam, toParam] = await Promise.all([
+      resolvePlace(from, whereFromId),
+      resolvePlace(to,   whereToId)
+    ]);
+    const base = (whereWhen === "at") ? baseDateFromInput() : new Date();
+    const baseQS = (whereWhen === "at") ? timeQSForDate(base) : "&timeIs=Departing";
+    // Base query (simplest, most reliable) + a few later departures for a timeline
+    // + one fewest-changes variant. All merged & deduped.
+    const calls = [ planJourney(fromParam, toParam, m, baseQS, null).catch(()=> []) ];
+    [12,24,36].forEach(off =>
+      calls.push(planJourney(fromParam, toParam, m, timeQSForDate(new Date(base.getTime()+off*60000)), null).catch(()=> []))
+    );
+    calls.push(planJourney(fromParam, toParam, m, baseQS, "LeastInterchange").catch(()=> []));
+    const lists = await Promise.all(calls);
+    const seen = new Set();
+    whereJourneys = lists.flat().filter(j => {
+      if(!j.startDateTime) return false;
+      const sig = jSig(j);
+      if(seen.has(sig)) return false;
+      seen.add(sig);
+      return true;
+    });
+    whereSearched = true;
+    // save the quickest route for offline use too
+    try{
+      const best = whereJourneys.slice().sort((a,b) => (a.duration||9999) - (b.duration||9999))[0];
+      if(best && best.legs) cacheOffline(offlineKey(from, to), from, to, journeySteps(best));
+    }catch(e){}
+  }catch(e){
+    console.error("where", e);
+    if(!silent) results.innerHTML = `<p class="where-hint">Couldn’t reach the planner. Try again.</p>`;
+  }
+  whereBusy = false;
+  goBtn.classList.remove("loading"); goBtn.textContent = "Find routes";
+  renderWhere();
+}
+
+// Build a TfL date+time query string from a Date, in London time.
+function timeQSForDate(d){
+  const day = new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/London",year:"numeric",month:"2-digit",day:"2-digit"}).format(d).replace(/-/g,"");
+  const hm  = new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit",hour12:false}).format(d).replace(":","");
+  return `&date=${day}&time=${hm}&timeIs=Departing`;
+}
+function baseDateFromInput(){
+  const t = document.getElementById("wf-time").value;   // "HH:MM"
+  if(!t) return new Date();
+  const [h,mi] = t.split(":").map(Number);
+  const d = new Date(); d.setHours(h, mi, 0, 0);
+  if(d.getTime() < Date.now() - 60000) d.setDate(d.getDate() + 1);  // roll to tomorrow if already past
+  return d;
+}
+
+function legLabel(L){
+  const m = L.mode?.id, name = L.routeOptions?.[0]?.name;
+  if(m === "bus" || m === "coach") return name ? `Bus ${name}` : "Bus";
+  if(m === "walking") return "Walk";
+  return name || MODE_LABEL[m] || m;
+}
+function stopName(p){
+  if(!p) return "";
+  let n = cleanStop(p.commonName || "");
+  const ind = p.stopLetter || p.indicator;
+  if(ind && !/stop/i.test(n)) n += ` (Stop ${ind})`;
+  return n;
+}
+function legLine(L){
+  const m = L.mode?.id;
+  const dur = (L.duration != null) ? `${L.duration}m` : "";
+  if(m === "walking"){
+    const to = L.arrivalPoint?.commonName ? ` to ${cleanStop(L.arrivalPoint.commonName)}` : "";
+    return `<div class="lg"><span class="lg-mode walk">Walk</span><span class="lg-txt">${dur}${to}</span></div>`;
+  }
+  const label = legLabel(L);
+  const from = stopName(L.departurePoint);
+  const to   = cleanStop(L.arrivalPoint?.commonName || "");
+  const stops = L.path?.stopPoints?.length;
+  const stopTxt = stops ? ` · ${stops} stop${stops>1?"s":""}` : "";
+  const dep = L.departureTime ? `${fmtHM.format(new Date(L.departureTime))} · ` : "";
+  const cls = (m === "bus" || m === "coach") ? "lg-mode bus" : "lg-mode";
+  return `<div class="lg"><span class="${cls}">${label}</span><span class="lg-txt">${dep}${from} → ${to}${stopTxt} · ${dur}</span></div>`;
+}
+
+// distinct-route signature (ignores time) — used to pick distinct fastest routes
+function routeSig(j){
+  return (j.legs||[]).filter(L => L.mode?.id !== "walking")
+    .map(L => L.routeOptions?.[0]?.name || L.mode?.id).join(">");
+}
+
+function whereCard(x){
+  const j = x.raw;
+  const secs = Math.round((x.dep - Date.now())/1000);
+  const legs = (j.legs || []);
+  const changes = Math.max(0, legs.filter(L => L.mode?.id !== "walking").length - 1);
+  const walk = Math.round(legs.filter(L => L.mode?.id === "walking").reduce((s,L) => s + (L.duration||0), 0));
+  const fare = (j.fare?.totalCost != null && j.fare.totalCost > 0) ? ` · £${(j.fare.totalCost/100).toFixed(2)}` : "";
+  const metaBits = [`${x.dur} min`, `${changes} change${changes!==1?"s":""}`];
+  if(walk > 0) metaBits.push(`Walk ${walk}m`);
+  return `<div class="wr-card">
+    <div class="wr-top">
+      <span class="wr-time">${fmtHM.format(new Date(x.dep))} → ${fmtHM.format(new Date(x.arr))}</span>
+      ${etaBadge(secs)}
+    </div>
+    <div class="wr-meta">${metaBits.join(" · ")}${fare}</div>
+    <div class="wr-legs">${legs.map(legLine).join("")}</div>
+  </div>`;
+}
+
+function renderWhere(){
+  if(!whereSearched) return;
+  const results = document.getElementById("where-results");
+  const pool = whereJourneys
+    .filter(j => j.startDateTime && j.arrivalDateTime)
+    .filter(j => !journeyUsesDisruptedLine(j))          // only routes actually running now
+    .map(j => ({ raw:j, dep:new Date(j.startDateTime).getTime(), arr:new Date(j.arrivalDateTime).getTime(), dur:j.duration }))
+    .filter(x => x.dep - Date.now() > -60000);
+
+  if(pool.length === 0){
+    if(!whereBusy) results.innerHTML = `<p class="where-hint">No routes for those options right now. Try different transport types or time.</p>`;
+    return;
+  }
+
+  // Fastest: 3 quickest *distinct* routes (soonest instance of each)
+  const byDur = [...pool].sort((a,b) => a.dur - b.dur || a.dep - b.dep);
+  const fastest = [], fastRoutes = new Set();
+  for(const x of byDur){
+    const r = routeSig(x.raw);
+    if(fastRoutes.has(r)) continue;
+    fastRoutes.add(r);
+    fastest.push(x);
+    if(fastest.length >= 3) break;
+  }
+  // Alternatives: everything else, by departure time
+  const fastSet = new Set(fastest.map(x => jSig(x.raw)));
+  const alts = pool.filter(x => !fastSet.has(jSig(x.raw))).sort((a,b) => a.dep - b.dep).slice(0,6);
+
+  let html = `<div class="wr-section"><p class="wr-label">Fastest</p><div class="wr-box">${fastest.map(whereCard).join("")}</div></div>`;
+  if(alts.length) html += `<div class="wr-section"><p class="wr-label">More options · by departure</p><div class="wr-list">${alts.map(whereCard).join("")}</div></div>`;
+  results.innerHTML = html;
+}
+
+/* ---- live suggestions as you type (TfL StopPoint search + nearby stations) ---- */
+const acTimers = {};
+const MODE_WORD = {
+  tube:"Tube", dlr:"DLR", overground:"Overground", "elizabeth-line":"Elizabeth line",
+  "national-rail":"Rail", tram:"Tram", "river-bus":"Pier", bus:"Bus", "cable-car":"Cable car"
+};
+// readable type label, e.g. "Tube station", "Bus stop", "Pier", "Tube · Rail"
+function stopType(modes){
+  const m = (modes||[]).filter(x => MODE_WORD[x]);
+  if(!m.length) return "Stop";
+  if(m.length === 1){
+    const w = MODE_WORD[m[0]];
+    if(w === "Bus") return "Bus stop";
+    if(w === "Pier") return "Pier";
+    return `${w} station`;
+  }
+  return m.map(x => MODE_WORD[x]).join(" · ");
+}
+// stations first, then piers, then bus stops
+function stationRank(modes){
+  const m = modes || [];
+  if(m.some(x => ["tube","dlr","elizabeth-line","overground","national-rail"].includes(x))) return 0;
+  if(m.includes("river-bus")) return 1;
+  if(m.includes("bus")) return 2;
+  return 3;
+}
+
+async function fetchSuggest(q, list, input, which){
+  try{
+    const key = APP_KEY ? `&app_key=${APP_KEY}` : "";
+    const res = await fetch(`https://api.tfl.gov.uk/StopPoint/Search/${encodeURIComponent(q)}?maxResults=10${key}`, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const data = await res.json();
+    const matches = (data.matches || []).filter(m => m.lat && m.lon);
+    matches.sort((a,b) => stationRank(a.modes) - stationRank(b.modes));   // tube/rail/DLR/Overground/Elizabeth first, then piers, buses, cable car
+    // dedupe by cleaned name (sort first means the station variant wins over a same-named bus stop)
+    const seen = new Set(), uniq = [];
+    for(const m of matches){
+      const k = cleanStop(m.name).toLowerCase();
+      if(seen.has(k)) continue;
+      seen.add(k); uniq.push(m);
+    }
+    const show = uniq.slice(0,10);
+    if(!show.length){ list.hidden = true; list.innerHTML = ""; return; }
+    list.innerHTML = show.map(m => {
+      const nm = cleanStop(m.name);
+      return `<div class="sg-item" data-loc="${m.lat},${m.lon}" data-name="${nm.replace(/"/g,"&quot;")}">
+        <span class="sg-name">${nm}</span>
+        <span class="sg-sub">${stopType(m.modes)}</span>
+      </div>`;
+    }).join("");
+    list.hidden = false;
+    list.querySelectorAll(".sg-item").forEach(it =>
+      it.addEventListener("mousedown", e => {
+        e.preventDefault();
+        input.value = it.dataset.name;
+        if(which === "from") whereFromId = it.dataset.loc; else whereToId = it.dataset.loc;
+        list.hidden = true;
+        if(whereSearched && document.getElementById("wf-from").value && document.getElementById("wf-to").value) runWhereSearch();
+      })
+    );
+  }catch(e){ list.hidden = true; }
+}
+
+/* ---- area explorer (assistance bar): lists stops in an area with type + stop letter ---- */
+function stopFull(sp){
+  let nm = cleanStop(sp.commonName || "");
+  const letter = sp.stopLetter || (sp.indicator || "").replace(/^stop\s*/i,"").trim();
+  if(letter && (sp.modes||[]).includes("bus") && !/\(stop/i.test(nm)) nm += ` (Stop ${letter})`;
+  return nm;
+}
+let axTimer = null;
+async function fetchAssist(){
+  const q = document.getElementById("ax-q").value.trim();
+  const box = document.getElementById("ax-results");
+  if(q.length < 2){ box.innerHTML = ""; return; }
+  try{
+    const key = APP_KEY ? `&app_key=${APP_KEY}` : "";
+    const sRes = await fetch(`https://api.tfl.gov.uk/StopPoint/Search/${encodeURIComponent(q)}?maxResults=8${key}`, {cache:"no-store"});
+    const sData = await sRes.json();
+    const ms = (sData.matches || []).filter(m => m.lat && m.lon);
+    // centre on a real station (tube/DLR/rail/Overground/Elizabeth), not a bus stop or the cable car
+    const m0 = ms.find(m => (m.modes||[]).some(x => ["tube","dlr","national-rail","overground","elizabeth-line"].includes(x))) || ms[0];
+    if(!m0){ box.innerHTML = `<p class="where-hint">No area found for “${q}”.</p>`; return; }
+    box.innerHTML = `<p class="where-hint">Finding stops near ${cleanStop(m0.name)}…</p>`;
+    const nRes = await fetch(`https://api.tfl.gov.uk/StopPoint?lat=${m0.lat}&lon=${m0.lon}&stopTypes=NaptanMetroStation,NaptanRailStation,NaptanFerryPort,NaptanPublicBusCoachTram&radius=800${key}`, {cache:"no-store"});
+    const nData = await nRes.json();
+    let stops = (nData.stopPoints || []).filter(sp => sp.lat && sp.lon).map(sp => ({
+      full:stopFull(sp), modes:sp.modes||[], lat:sp.lat, lon:sp.lon, distance:sp.distance||0
+    }));
+    stops.unshift({ full:cleanStop(m0.name), modes:m0.modes||[], lat:m0.lat, lon:m0.lon, distance:0 });
+    const seen = new Set(), uniq = [];
+    for(const s of stops){
+      const k = (s.full||"").toLowerCase();
+      if(!k || seen.has(k)) continue;
+      seen.add(k); uniq.push(s);
+    }
+    uniq.sort((a,b) => stationRank(a.modes) - stationRank(b.modes) || a.distance - b.distance);
+    const show = uniq.slice(0,16);
+    box.innerHTML = show.map(s => `
+      <div class="ax-item" data-loc="${s.lat},${s.lon}" data-name="${(s.full||"").replace(/"/g,"&quot;")}">
+        <div class="ax-info"><span class="ax-name">${s.full}</span><span class="ax-type">${stopType(s.modes)}</span></div>
+        <div class="ax-btns"><button type="button" class="ax-from">From</button><button type="button" class="ax-to">To</button></div>
+      </div>`).join("");
+    box.querySelectorAll(".ax-item").forEach(it => {
+      it.querySelector(".ax-from").addEventListener("click", () => setField("from", it.dataset.name, it.dataset.loc));
+      it.querySelector(".ax-to").addEventListener("click", () => setField("to", it.dataset.name, it.dataset.loc));
+    });
+  }catch(e){ box.innerHTML = `<p class="where-hint">Couldn’t load stops. Try again.</p>`; }
+}
+function setField(which, name, loc){
+  const input = document.getElementById(which === "from" ? "wf-from" : "wf-to");
+  input.value = name;
+  if(which === "from") whereFromId = loc; else whereToId = loc;
+  if(document.getElementById("wf-from").value && document.getElementById("wf-to").value) runWhereSearch();
+}
+(function(){
+  const ax = document.getElementById("ax-q");
+  if(ax) ax.addEventListener("input", () => { clearTimeout(axTimer); axTimer = setTimeout(fetchAssist, 280); });
+})();
+
+/* ---------- offline route search (general directions, saved for no-signal use) ---------- */
+const OFFLINE_KEY = "lc_offline_routes";
+const escapeHtml = s => (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function offlineKey(f,t){ return (f + " > " + t).toLowerCase().replace(/\s+/g," ").trim(); }
+function loadOfflineCache(){ try{ return JSON.parse(localStorage.getItem(OFFLINE_KEY) || "{}"); }catch(e){ return {}; } }
+function cacheOffline(key, from, to, steps){
+  if(!steps || !steps.length) return;
+  try{
+    const c = loadOfflineCache();
+    c[key] = { from, to, steps, ts: Date.now() };
+    const keys = Object.keys(c).sort((a,b) => c[b].ts - c[a].ts).slice(0,60);  // keep 60 newest
+    const trimmed = {}; keys.forEach(k => trimmed[k] = c[k]);
+    localStorage.setItem(OFFLINE_KEY, JSON.stringify(trimmed));
+  }catch(e){ /* storage unavailable — skip */ }
+}
+function getOffline(key){ return loadOfflineCache()[key] || null; }
+
+// one journey leg → a directions string (no times)
+function legToStep(L){
+  const m = L.mode?.id;
+  if(m === "walking"){
+    const to = L.arrivalPoint?.commonName ? ` to ${cleanStop(L.arrivalPoint.commonName)}` : "";
+    const d = L.duration ? ` (${L.duration}m)` : "";
+    return `Walk${to}${d}`;
+  }
+  const label = legLabel(L);
+  const from = cleanStop(L.departurePoint?.commonName || "");
+  const to   = cleanStop(L.arrivalPoint?.commonName || "");
+  const stops = L.path?.stopPoints?.length;
+  const st = stops ? ` · ${stops} stop${stops>1?"s":""}` : "";
+  return `<b>${label}</b> · ${from} → ${to}${st}`;
+}
+function journeySteps(j){ return (j.legs||[]).map(legToStep).filter(Boolean); }
+
+function renderOfflineSteps(box, from, to, steps, saved){
+  if(!steps || !steps.length){ box.innerHTML = `<p class="where-hint">No route found.</p>`; return; }
+  box.innerHTML = `<p class="of-head"><b>${escapeHtml(from)}</b> → <b>${escapeHtml(to)}</b>${saved ? ` <span class="saved">· saved · no live times</span>` : ""}</p>`
+    + `<div class="off-steps">`
+    + steps.map((s,i) => `<div class="off-step"><span class="n">${i+1}</span><span class="s">${s}</span></div>`).join("")
+    + `</div>`;
+}
+
+async function offlineSearch(){
+  const from = document.getElementById("of-from").value.trim();
+  const to   = document.getElementById("of-to").value.trim();
+  const box  = document.getElementById("of-results");
+  if(!from || !to){ box.innerHTML = `<p class="where-hint">Enter a start and a destination.</p>`; return; }
+  const key = offlineKey(from, to);
+
+  if(navigator.onLine){
+    box.innerHTML = `<p class="where-hint">Finding the route…</p>`;
+    try{
+      const [fp, tp] = await Promise.all([resolvePlace(from, null), resolvePlace(to, null)]);
+      const js = await planJourney(fp, tp, "tube,dlr,overground,elizabeth-line,national-rail,bus,river-bus", "&timeIs=Departing", "LeastTime");
+      const top = (js || []).find(j => j.legs && j.legs.length);
+      if(top){
+        const steps = journeySteps(top);
+        cacheOffline(key, from, to, steps);
+        renderOfflineSteps(box, from, to, steps, false);
+        return;
+      }
+      box.innerHTML = `<p class="where-hint">No route found for those places.</p>`;
+      return;
+    }catch(e){ /* fall through to cache */ }
+  }
+  const c = getOffline(key);
+  if(c) renderOfflineSteps(box, c.from, c.to, c.steps, true);
+  else  box.innerHTML = `<p class="where-hint">No saved route for “${escapeHtml(from)} → ${escapeHtml(to)}”. Open it once while online to save it for offline use.</p>`;
+}
+
+document.getElementById("of-go")?.addEventListener("click", offlineSearch);
+["of-from","of-to"].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener("keydown", e => { if(e.key === "Enter") offlineSearch(); });
+});
+
+function attachAutocomplete(inputId, listId, which){
+  const input = document.getElementById(inputId), list = document.getElementById(listId);
+  input.addEventListener("input", () => {
+    if(which === "from") whereFromId = null; else whereToId = null;  // typing clears a chosen pick
+    const q = input.value.trim();
+    clearTimeout(acTimers[inputId]);
+    if(q.length < 2){ list.hidden = true; list.innerHTML = ""; return; }
+    acTimers[inputId] = setTimeout(() => fetchSuggest(q, list, input, which), 220);
+  });
+  input.addEventListener("focus", () => { if(list.innerHTML) list.hidden = false; });
+  input.addEventListener("blur",  () => setTimeout(() => { list.hidden = true; }, 180));
+}
+attachAutocomplete("wf-from", "sg-from", "from");
+attachAutocomplete("wf-to",   "sg-to",   "to");
+
+// wire up the planner controls
+document.querySelectorAll("#wf-modes .chip").forEach(c =>
+  c.addEventListener("click", () => { c.classList.toggle("on"); if(whereSearched) runWhereSearch(); })
+);
+document.querySelectorAll(".wf-time .seg").forEach(seg =>
+  seg.addEventListener("click", () => {
+    document.querySelectorAll(".wf-time .seg").forEach(s => s.classList.remove("on"));
+    seg.classList.add("on");
+    whereWhen = seg.dataset.when;
+    document.getElementById("wf-time").disabled = (whereWhen !== "at");
+    if(whereWhen === "at") document.getElementById("wf-time").focus();
+  })
+);
+document.getElementById("wf-go").addEventListener("click", () => runWhereSearch());
+["wf-from","wf-to"].forEach(id =>
+  document.getElementById(id).addEventListener("keydown", e => { if(e.key === "Enter") runWhereSearch(); })
+);
+
+/* ---------- clock + refresh on wake ---------- */
+function tickClock(){
+  document.getElementById("clock").textContent =
+    new Intl.DateTimeFormat("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false,timeZone:"Europe/London"}).format(new Date());
+}
+
+/* ---------- manual refresh button ---------- */
+function resetWhere(){
+  clearTimeout(axTimer);
+  Object.keys(acTimers).forEach(k => clearTimeout(acTimers[k]));   // cancel any pending suggestion fetches
+  document.getElementById("wf-from").value = "";
+  document.getElementById("wf-to").value = "";
+  whereFromId = null; whereToId = null;
+  document.querySelectorAll("#wf-modes .chip").forEach(c => c.classList.add("on"));   // all transport back on
+  document.querySelectorAll(".wf-time .seg").forEach(s => s.classList.toggle("on", s.dataset.when === "now"));
+  whereWhen = "now";
+  const t = document.getElementById("wf-time"); t.value = ""; t.disabled = true;
+  document.getElementById("sg-from").hidden = true; document.getElementById("sg-from").innerHTML = "";
+  document.getElementById("sg-to").hidden = true;   document.getElementById("sg-to").innerHTML = "";
+  const ax = document.getElementById("ax-q"); if(ax) ax.value = "";
+  const axr = document.getElementById("ax-results"); if(axr) axr.innerHTML = "";
+  whereJourneys = []; whereSearched = false; whereBusy = false;
+  document.getElementById("where-results").innerHTML = `<p class="where-hint">Enter where you’re starting and where you’re going.</p>`;
+}
+
+function refreshView(){
+  const btn = document.getElementById("refreshBtn");
+  btn.classList.add("spin");
+  setTimeout(() => btn.classList.remove("spin"), 700);
+  const v = document.body.dataset.view;
+  if(v === "where"){
+    resetWhere();   // start fresh, as if opening it for the first time
+  } else if(v === "offline"){
+    ["of-from","of-to"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+    const r = document.getElementById("of-results"); if(r) r.innerHTML = "";
+  } else {
+    pollBoards(); pollLegs(); pollStatus(); pollRain(); pollPlannerStatus();
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "visible"){
+    pollBoards();
+    pollStatus();
+    pollPlannerStatus();
+    pollRain();
+    pollLegs();
+    if(document.body.dataset.view === "where" && whereWhen === "now" && whereSearched) runWhereSearch(true);
+  }
+});
+
+pollBoards();
+pollStatus();
+pollPlannerStatus();
+pollRain();
+pollLegs();
+setInterval(pollBoards, POLL_MS);
+setInterval(pollStatus, STATUS_POLL_MS);
+setInterval(pollPlannerStatus, STATUS_POLL_MS);
+setInterval(pollRain, RAIN_POLL_MS);
+setInterval(pollLegs, LEG_POLL_MS);
+// keep "Where next?" live when leaving now
+setInterval(() => { if(document.body.dataset.view === "where" && whereWhen === "now" && whereSearched && !whereBusy) runWhereSearch(true); }, 60000);
+setInterval(()=>{ render(); renderLegs(); renderWhere(); tickClock(); }, 1000);
+tickClock();
+
+// Register the offline shell (makes the Offline view work with no signal).
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
